@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            //カテゴリー名
-            $table->string('name', 100)->unique();
-            //カテゴリーの説明
-            $table->text('description')->nullable();
+            $table->string('name');
+            $table->text('description')->nullable(); // description も追加しておくと良いでしょう
+            // ここに parent_id カラムを追加します
+            // parent_id は nullable で、categories テーブル自身の id を参照する外部キーとします
+            $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
             $table->timestamps();
         });
     }
