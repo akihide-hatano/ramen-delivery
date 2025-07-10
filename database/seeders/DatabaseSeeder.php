@@ -12,10 +12,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            // ユーザーは他のテーブルが参照する可能性があるので、最初に配置するのが一般的
+            UsersTableSeeder::class,
+            // カテゴリは商品が参照するので、次に配置
             CategoriesTableSeeder::class,
+            // 店舗と商品は互いに参照するが、店舗が先に必要になることが多い
             ShopsTableSeeder::class,
             ProductsTableSeeder::class,
-            UsersTableSeeder::class,
+            // 必要に応じて他のシーダーもここに追加
         ]);
     }
 }
