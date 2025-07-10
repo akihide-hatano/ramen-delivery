@@ -211,6 +211,72 @@
                 </div>
             </div>
         </section>
+        @push('scripts')
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // URLにすでに緯度・経度が含まれているか確認
+            const urlParams = new URLSearchParams(window.location.search);
+            const existingLat = urlParams.get('lat');
+            const existingLon = urlParams.get('lon');
+
+            // 既に位置情報がURLにあれば、再度取得しない
+            if (existingLat && existingLon) {
+                console.log('位置情報は既にURLに含まれています:', existingLat, existingLon);
+                return; // 処理を終了
+            }
+
+            // Geolocation APIが利用可能かチェック
+            if (navigator.geolocation) {
+                // 現在位置を一度だけ取得
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        console.log('位置情報を取得しました:', lat, lon);
+
+                        // 取得した位置情報をクエリパラメータとしてURLに追加してリロード
+                        // これにより、Laravel側でlatとlonを受け取れるようになる
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.set('lat', lat);
+                        currentUrl.searchParams.set('lon', lon);
+                        window.location.href = currentUrl.toString();
+
+                    },
+                    function(error) {
+                        // エラーハンドリング
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                console.error("位置情報の利用が許可されませんでした。");
+                                alert("近くの店舗を表示するためには位置情報の許可が必要です。");
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                console.error("位置情報を利用できません。");
+                                alert("現在地を取得できませんでした。");
+                                break;
+                            case error.TIMEOUT:
+                                console.error("位置情報の取得がタイムアウトしました。");
+                                alert("位置情報の取得に時間がかかりすぎました。");
+                                break;
+                            default:
+                                console.error("不明なエラーが発生しました: " + error.message);
+                                alert("位置情報の取得中に不明なエラーが発生しました。");
+                                break;
+                        }
+                    },
+                    {
+                        enableHighAccuracy: true, // 高精度な位置情報を要求
+                        timeout: 10000,           // 10秒でタイムアウト
+                        maximumAge: 0             // キャッシュされた位置情報を使わない
+                    }
+                );
+            } else {
+                // Geolocation APIがサポートされていない場合
+                console.warn("お使いのブラウザは位置情報をサポートしていません。");
+                // 代替手段（地域選択フォームなど）をユーザーに促す
+            }
+        });
+        </script>
+    @endpush
     </main>
 
     <footer class="bg-gray-800 text-white p-6 text-center mt-12">
