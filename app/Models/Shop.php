@@ -2,57 +2,39 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class Shop extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
     protected $fillable = [
         'name',
-        'email',
-        'password',
-        'is_admin', // 追加したカラムをマスアサインメント可能にする
+        'address',
+        'photo_1_url',
+        'photo_2_url',
+        'photo_3_url',
+        'description',
+        'phone_number',
+        'has_parking',
+        'business_hours',
+        'regular_holiday',
     ];
-
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_admin' => 'boolean', // boolean型にキャストする
-        ];
-    }
 
     /**
-     * ユーザーが管理者かどうかをチェックするヘルパーメソッド
+     * Shop は複数の商品を持つ (一対多)
      */
-    public function isAdmin(): bool
+    public function products()
     {
-        return $this->is_admin;
+        return $this->hasMany(Product::class);
     }
 
     /**
-     * User は複数の注文を持つ (一対多)
+     * Shop は複数の注文を持つ (一対多)
      */
     public function orders()
     {
         return $this->hasMany(Order::class);
-    }
-
-    /**
-     * User は一つのカートを持つ (一対一)
-     */
-    public function cart()
-    {
-        return $this->hasOne(Cart::class);
     }
 }
