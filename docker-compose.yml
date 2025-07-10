@@ -25,7 +25,7 @@ services:
             - pgsql
             - mailpit
     pgsql:
-        image: 'postgres:17'
+        image: 'postgis/postgis:16-3.4' #(例: PostgreSQL 16 と PostGIS 3.4)
         ports:
             - '${FORWARD_DB_PORT:-5432}:5432'
         environment:
@@ -35,18 +35,14 @@ services:
             POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
         volumes:
             - 'sail-pgsql:/var/lib/postgresql/data'
-            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+            # PostGISイメージは通常、自動でエクステンションを作成しないので、
+            # データベース起動後に手動でCREATE EXTENSION postgis; を実行する必要がある
+            # または、以下のようなinitdbスクリプトを追加することも可能
+            - './docker/init-postgis.sql:/docker-entrypoint-initdb.d/20-init-postgis.sql'
         networks:
             - sail
         healthcheck:
-            test:
-                - CMD
-                - pg_isready
-                - '-q'
-                - '-d'
-                - '${DB_DATABASE}'
-                - '-U'
-                - '${DB_USERNAME}'
+            test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}"]
             retries: 3
             timeout: 5s
     pgadmin:
