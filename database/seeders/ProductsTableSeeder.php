@@ -14,167 +14,123 @@ class ProductsTableSeeder extends Seeder
     public function run(): void
     {
         // 必要なカテゴリIDを取得（子カテゴリも含む）
-        $ramenCategoryId = DB::table('categories')->where('name', 'ラーメン')->first()->id;
         $shoyuRamenId = DB::table('categories')->where('name', '醤油ラーメン')->first()->id;
         $tonkotsuRamenId = DB::table('categories')->where('name', '豚骨ラーメン')->first()->id;
         $misoRamenId = DB::table('categories')->where('name', '味噌ラーメン')->first()->id;
-
-        $sideMenuCategoryId = DB::table('categories')->where('name', 'サイドメニュー')->first()->id;
         $karaageId = DB::table('categories')->where('name', '唐揚げ')->first()->id;
         $chahanId = DB::table('categories')->where('name', 'チャーハン')->first()->id;
-
         $drinkCategoryId = DB::table('categories')->where('name', 'ドリンク')->first()->id;
         $beerId = DB::table('categories')->where('name', 'ビール')->first()->id;
-
         $toppingCategoryId = DB::table('categories')->where('name', 'トッピング')->first()->id;
 
+        // 既存の店舗ID取得 (全て取得)
+        $shops = DB::table('shops')->get();
 
-        // 既存の店舗ID取得
-        $shop1Id = DB::table('shops')->where('name', '博多ラーメン 豚骨亭')->first()->id;
-        $shop2Id = DB::table('shops')->where('name', '札幌味噌ラーメン 麺匠')->first()->id;
-        $shop3Id = DB::table('shops')->where('name', '中華そば 懐かし屋')->first()->id;
-        $ushioyaNambaId = DB::table('shops')->where('name', 'ラーメン潮屋 大阪難波店')->first()->id;
-        $ushioyaUmedaId = DB::table('shops')->where('name', 'ラーメン潮屋 梅田店')->first()->id;
-        $ushioyaShibataId = DB::table('shops')->where('name', 'ラーメン潮屋 芝田店')->first()->id;
+        // ラーメン潮屋の店舗IDのみを抽出
+        $ushioyaShopIds = $shops->filter(function ($shop) {
+            return str_contains($shop->name, 'ラーメン潮屋');
+        })->pluck('id')->toArray();
 
-        // --- ここから新しい店舗IDを取得 ---
-        $ushioyaKawaSanjoId = DB::table('shops')->where('name', 'ラーメン潮屋 河原町三条店')->first()->id;
-        $ushioyaKawaShijoId = DB::table('shops')->where('name', 'ラーメン潮屋 河原町四条店')->first()->id;
-        $ushioyaOmiyaId = DB::table('shops')->where('name', 'ラーメン潮屋 大宮店')->first()->id;
-        $ushioyaKyotoStId = DB::table('shops')->where('name', 'ラーメン潮屋 京都駅店')->first()->id;
-        $ushioyaKarasumaId = DB::table('shops')->where('name', 'ラーメン潮屋 烏丸店')->first()->id;
-        $ushioyaKarasuma7Id = DB::table('shops')->where('name', 'ラーメン潮屋 烏丸七条店')->first()->id;
-
-
-        DB::table('products')->insert([
-            // --- (既存の商品のデータは省略。上記ファイルの末尾に追加してください) ---
-
-            // --- ラーメン潮屋 河原町三条店 の商品 ---
+        // --- 共通商品ラインナップを定義 ---
+        $commonUshioyaProducts = [
             [
-                'shop_id' => $ushioyaKawaSanjoId,
                 'category_id' => $shoyuRamenId,
-                'name' => '潮屋特製ラーメン',
-                'description' => '魚介の旨味が凝縮された、あっさり醤油スープが自慢。',
+                'name' => '潮屋ラーメン',
+                'description' => '魚介系のあっさり醤油スープが人気の看板メニュー。',
                 'price' => 880,
-                'image_url' => 'https://example.com/ushioya_kawasanjyo_ramen.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'image_url' => 'https://example.com/ushioya_standard_ramen.jpg',
             ],
             [
-                'shop_id' => $ushioyaKawaSanjoId,
-                'category_id' => $toppingCategoryId,
-                'name' => '全部のせトッピング',
-                'description' => 'チャーシュー、味玉、メンマ、ネギ増量！',
-                'price' => 300,
-                'image_url' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // --- ラーメン潮屋 河原町四条店 の商品 ---
-            [
-                'shop_id' => $ushioyaKawaShijoId,
                 'category_id' => $shoyuRamenId,
-                'name' => '潮屋ラーメン（定番）',
-                'description' => '迷ったらこれ！潮屋の基本の一杯。',
-                'price' => 850,
-                'image_url' => 'https://example.com/ushioya_kawashijo_ramen.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'name' => '味玉潮屋ラーメン',
+                'description' => '潮屋ラーメンに特製味玉をトッピング。',
+                'price' => 980,
+                'image_url' => 'https://example.com/ushioya_ajitama_ramen.jpg',
             ],
             [
-                'shop_id' => $ushioyaKawaShijoId,
                 'category_id' => $chahanId,
-                'name' => 'ミニ焼き飯',
-                'description' => 'ラーメンのお供に最適なミニサイズの焼き飯。',
+                'name' => '半チャーハン',
+                'description' => 'ラーメンと相性抜群のミニチャーハン。',
                 'price' => 400,
-                'image_url' => 'https://example.com/ushioya_yakimeshi.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // --- ラーメン潮屋 大宮店 の商品 ---
-            [
-                'shop_id' => $ushioyaOmiyaId,
-                'category_id' => $shoyuRamenId,
-                'name' => '潮屋ラーメン（あっさり）',
-                'description' => '女性にも人気の、さらにあっさりとした味わい。',
-                'price' => 820,
-                'image_url' => 'https://example.com/ushioya_omiya_ramen.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'image_url' => 'https://example.com/ushioya_half_chahan.jpg',
             ],
             [
-                'shop_id' => $ushioyaOmiyaId,
                 'category_id' => $karaageId,
                 'name' => '鶏の唐揚げ（3個）',
-                'description' => '外はカリッと中はジューシーな唐揚げ。',
+                'description' => '外はカリッと中はジューシー。',
                 'price' => 350,
-                'image_url' => 'https://example.com/karaage.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // --- ラーメン潮屋 京都駅店 の商品 ---
-            [
-                'shop_id' => $ushioyaKyotoStId,
-                'category_id' => $shoyuRamenId,
-                'name' => '京都駅限定ラーメン',
-                'description' => '駅店限定の特別な一杯。',
-                'price' => 900,
-                'image_url' => 'https://example.com/ushioya_kyoto_st_ramen.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'image_url' => 'https://example.com/ushioya_karaage.jpg',
             ],
             [
-                'shop_id' => $ushioyaKyotoStId,
-                'category_id' => $drinkCategoryId,
-                'name' => '緑茶',
-                'description' => '食後にさっぱりと。',
-                'price' => 180,
-                'image_url' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // --- ラーメン潮屋 烏丸店 の商品 ---
-            [
-                'shop_id' => $ushioyaKarasumaId,
-                'category_id' => $shoyuRamenId,
-                'name' => '烏丸スペシャルラーメン',
-                'description' => 'オフィス街で人気の烏丸店限定メニュー。',
-                'price' => 920,
-                'image_url' => 'https://example.com/ushioya_karasuma_ramen.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'shop_id' => $ushioyaKarasumaId,
-                'category_id' => $chahanId,
-                'name' => '高菜ご飯',
-                'description' => 'ピリ辛高菜が食欲をそそるご飯もの。',
-                'price' => 250,
-                'image_url' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // --- ラーメン潮屋 烏丸七条店 の商品 ---
-            [
-                'shop_id' => $ushioyaKarasuma7Id,
-                'category_id' => $shoyuRamenId,
-                'name' => '潮屋ラーメンセット',
-                'description' => 'ラーメンと選べるサイドメニューのお得なセット。',
-                'price' => 1100,
-                'image_url' => 'https://example.com/ushioya_karasuma7_set.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'shop_id' => $ushioyaKarasuma7Id,
                 'category_id' => $beerId,
-                'name' => 'ハイボール',
-                'description' => 'ラーメンと相性抜群！',
-                'price' => 400,
+                'name' => '生ビール',
+                'description' => '冷たい生ビール。',
+                'price' => 500,
                 'image_url' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
-        ]);
+            [
+                'category_id' => $drinkCategoryId,
+                'name' => 'ウーロン茶',
+                'description' => 'さっぱりとしたウーロン茶。',
+                'price' => 200,
+                'image_url' => null,
+            ],
+            [
+                'category_id' => $toppingCategoryId,
+                'name' => '替え玉',
+                'description' => '追加の麺。',
+                'price' => 150,
+                'image_url' => null,
+            ],
+            [
+                'category_id' => $toppingCategoryId,
+                'name' => '特製味玉',
+                'description' => 'とろーり半熟の味付け卵。',
+                'price' => 120,
+                'image_url' => null,
+            ],
+        ];
+
+        $productsToInsert = [];
+
+        // ラーメン潮屋の各店舗に共通商品を割り当てる
+        foreach ($ushioyaShopIds as $shopId) {
+            foreach ($commonUshioyaProducts as $productData) {
+                $productsToInsert[] = array_merge($productData, [
+                    'shop_id' => $shopId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        // --- 個別の店舗の商品データ（もしあれば） ---
+        // 例: 京都駅店限定ラーメンなど、特定の店舗にしかない商品
+        $ushioyaKyotoStId = DB::table('shops')->where('name', 'ラーメン潮屋 京都駅店')->first()->id; // 必要ならIDを再取得
+        $ushioyaKawaSanjoId = DB::table('shops')->where('name', 'ラーメン潮屋 河原町三条店')->first()->id; // 必要ならIDを再取得
+
+        $productsToInsert[] = [
+            'shop_id' => $ushioyaKyotoStId,
+            'category_id' => $shoyuRamenId,
+            'name' => '京都駅限定ラーメン',
+            'description' => '駅店限定の特別な一杯。',
+            'price' => 900,
+            'image_url' => 'https://example.com/ushioya_kyoto_st_ramen.jpg',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+        $productsToInsert[] = [
+            'shop_id' => $ushioyaKawaSanjoId,
+            'category_id' => $shoyuRamenId,
+            'name' => '潮屋特製ラーメン', // 既存データ名と重複しているが、シーダーとしては問題なし
+            'description' => '魚介の旨味が凝縮された、あっさり醤油スープが自慢。（河原町三条限定の少し特別な配合を想定）',
+            'price' => 880,
+            'image_url' => 'https://example.com/ushioya_kawasanjyo_ramen.jpg',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+
+        DB::table('products')->insert($productsToInsert);
     }
 }
