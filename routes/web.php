@@ -5,7 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController; // 例: ホームコントローラー
 use App\Http\Controllers\ShopController; // 例: 店舗関連のコントローラー
 use App\Http\Controllers\ProductController; // 例: 商品関連のコントローラー
-use App\Http\Controllers\Admin\AdminHomeController; // 例: 管理者用ホームコントローラー
+use App\Http\Controllers\Admin\AdminHomeController;    // Admin 以下のコントローラー
+use App\Http\Controllers\Admin\AdminShopController;   // Admin 以下のコントローラー
+use App\Http\Controllers\Admin\AdminProductController;  // Admin 以下のコントローラー
+use App\Http\Controllers\Admin\AdminCategoryController; // Admin 以下のコントローラー
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +64,4 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
 
     // 例: 管理者によるカテゴリ管理
     Route::resource('categories', AdminCategoryController::class); // AdminCategoryController を作成する必要があります
-
-    // 必要に応じて他の管理機能を追加...
 });
