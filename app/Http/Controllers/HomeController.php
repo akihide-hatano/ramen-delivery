@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Shop;    // Shopモデルをuseする
 use App\Models\Product; // Productモデルをuseする
-use Illuminate\Support\Facades\DB; // DBファサードをuseする (ST_Distance_Sphere用)
+use Illuminate\Support\Facades\DB; // DBファサードをuseする
 
 class HomeController extends Controller
 {
@@ -20,28 +20,28 @@ class HomeController extends Controller
         $nearbyShops = collect(); // 近くの店舗を格納するコレクションを初期化
 
         // ユーザーの位置情報がクエリパラメータで渡された場合
-        $userLat = $request->query('lat');
-        $userLon = $request->query('lon');
+        $userLat = (float)$request->query('lat'); // floatにキャスト
+        $userLon = (float)$request->query('lon'); // floatにキャスト
 
         if ($userLat && $userLon) {
-            // ユーザーの緯度・経度を数値に変換（安全のため）
-            $userLat = (float)$userLat;
-            $userLon = (float)$userLon;
-
-            // データベースのST_Distance_Sphere関数を使用し、距離を計算して取得
-            // 距離はメートル単位で返される
+            // データベースのST_Distance関数を使用し、距離を計算して取得
+            // 距離はメートル単位で返されます
             $nearbyShops = Shop::select('shops.*') // Shopモデルの全カラムを選択
-                // ST_Distance_Sphere(point(経度, 緯度), point(ユーザー経度, ユーザー緯度))
-                ->selectRaw('ST_Distance_Sphere(point(longitude, latitude), point(?, ?)) AS distance', [$userLon, $userLat])
-                ->whereNotNull('latitude') // 緯度・経度データがある店舗のみを対象
-                ->whereNotNull('longitude')
+                // ★ここをPostgreSQL/PostGIS用に修正★
+                // ST_Distance(店舗のlocationカラム, ユーザーの位置情報を表すPointオブジェクト)
+                // ST_MakePoint(経度, 緯度) - PostGISは経度、緯度の順！
+                // ST_SetSRID(..., 4326): WGS84座標系 (4326) を設定
+                // ::geography: geography型にキャストして地球の丸みを考慮した正確な距離計算を行う
+                ->selectRaw('ST_Distance(location, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography) AS distance', [$userLon, $userLat])
+                ->whereNotNull('location') // locationカラムがある店舗のみを対象
                 ->having('distance', '<', 50000) // 例: 50km (50000メートル) 以内の店舗
                 ->orderBy('distance') // 距離が近い順にソート
                 ->limit(5) // 最大5件取得
                 ->get();
+            
+            dd($nearbyShops); // ★デバッグ用: これでデータを確認★
 
             if ($nearbyShops->isEmpty()) {
-                // 近くに店舗がない場合のメッセージ
                 session()->flash('info', 'お近くに店舗は見つかりませんでした。');
             }
         } else {
