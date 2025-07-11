@@ -1,19 +1,9 @@
-{{-- home.blade.php は、<x-app-layout> コンポーネントを使用します。 --}}
-{{-- <!DOCTYPE html>, <html>, <head>, <body> タグは全て削除してください。 --}}
-{{-- また、Tailwind CSS CDN と inline <style> も削除してください。app.blade.php の @vite が管理します。 --}}
-
 <x-app-layout>
-    {{-- app.blade.php の $header スロットに何も渡さない場合は、<x-slot name="header"> は不要です。
-         もしhomeページに特定のヘッダーが必要な場合は、ここに記述します。 --}}
     {{-- <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             ホーム
         </h2>
     </x-slot> --}}
-
-    {{-- ここから下のコンテンツが、app.blade.php の <main>{{ $slot }}</main> の中に挿入されます。 --}}
-    {{-- home.blade.php の元の <header> タグは、app.blade.php のナビゲーションと重複する可能性があるため、
-         必要に応じて調整してください。今回は、home.blade.php 独自のヘッダーとして残します。 --}}
     <header class="bg-gray-800 text-white p-4 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold text-red-500">ラーメン潮屋</h1>
@@ -90,7 +80,6 @@
                         {{ session('info') }}
                     </div>
                 @endif
-
                 {{-- 近くの店舗がある場合のみ表示 --}}
                 @if ($nearbyShops->isNotEmpty())
                     @foreach ($nearbyShops as $shop)
@@ -125,7 +114,6 @@
                         </p>
                     </div>
                 @endif
-
                 <div class="text-center mt-8">
                     <a href="{{ route('shops.index') }}" class="inline-block bg-gray-700 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-800 transition duration-300">全ての店舗を見る</a>
                 </div>
@@ -141,7 +129,7 @@
                         $shioyaShopIds = \App\Models\Shop::where('name', 'like', 'ラーメン潮屋%')->pluck('id');
                         $featuredProducts = \App\Models\Product::whereIn('shop_id', $shioyaShopIds)
                                             ->inRandomOrder()
-                                            ->limit(6) // 6個表示
+                                            ->limit(10) // 6個表示
                                             ->get();
                     @endphp
 

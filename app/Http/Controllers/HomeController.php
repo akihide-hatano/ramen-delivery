@@ -29,7 +29,7 @@ class HomeController extends Controller
                 ->selectRaw('ST_Distance(location, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography) AS distance', [$userLon, $userLat])
                 ->whereNotNull('location') // locationカラムがある店舗のみを対象
                 ->orderBy('distance') // 距離が近い順にソート
-                ->limit(5) // 最大5件取得
+                ->limit(3) // 最大3件取得
                 ->get();
 
             // ここで、取得したコレクションに対してPHP側でフィルタリングを行う
