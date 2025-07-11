@@ -39,7 +39,6 @@
     </header>
 
     <main>
-        <!-- ヒーローセクション: 麺とスープにこだわり抜いた一杯 -->
         <section class="hero-section">
             <div class="hero-overlay"></div>
             <div class="hero-content container mx-auto">
@@ -57,25 +56,21 @@
             </div>
         </section>
 
-        <!-- こだわりセクション -->
         <section class="commitment-section">
             <div class="commitment-bg-pattern"></div>
             <div class="container mx-auto relative z-10">
                 <h3 class="text-4xl font-bold text-center text-gray-800 mb-12">潮屋のこだわり</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- こだわり1: 麺へのこだわり -->
                     <div class="commitment-item bg-white p-6 rounded-lg shadow-lg text-center">
                         <img src="https://placehold.co/150x100/E0E0E0/000000?text=Noodle" alt="麺" class="w-full h-auto object-cover rounded-md mb-4">
                         <h4 class="text-2xl font-semibold text-gray-800 mb-3">麺へのこだわり</h4>
                         <p class="text-gray-700">厳選された小麦粉を使用し、独自の配合で打ち上げた特製麺は、スープとの絡みが絶妙です。</p>
                     </div>
-                    <!-- こだわり2: スープへのこだわり -->
                     <div class="commitment-item bg-white p-6 rounded-lg shadow-lg text-center">
                         <img src="https://placehold.co/150x100/E0E0E0/000000?text=Soup" alt="スープ" class="w-full h-auto object-cover rounded-md mb-4">
                         <h4 class="text-2xl font-semibold text-gray-800 mb-3">スープへのこだわり</h4>
                         <p class="text-gray-700">数種類の魚介と鶏ガラをじっくり煮込んだ、深みのあるあっさりとした潮屋特製スープ。</p>
                     </div>
-                    <!-- こだわり3: 具材へのこだわり -->
                     <div class="commitment-item bg-white p-6 rounded-lg shadow-lg text-center">
                         <img src="https://placehold.co/150x100/E0E0E0/000000?text=Ingredients" alt="具材" class="w-full h-auto object-cover rounded-md mb-4">
                         <h4 class="text-2xl font-semibold text-gray-800 mb-3">具材へのこだわり</h4>
@@ -85,31 +80,58 @@
             </div>
         </section>
 
-        <!-- 店舗情報・地図セクション -->
         <section class="map-section">
             <div class="container mx-auto">
                 <h3 class="text-3xl font-bold text-center text-gray-800 mb-8">お近くの店舗を探す</h3>
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <div class="md:flex md:items-center">
-                        <div class="md:w-1/2 p-4">
-                            <h4 class="text-2xl font-semibold text-gray-800 mb-4">大阪難波店</h4>
-                            <p class="text-gray-700 mb-2">住所: 大阪府大阪市中央区難波</p>
-                            <p class="text-gray-700 mb-2">電話: 06-1111-2222</p>
-                            <p class="text-gray-700 mb-4">営業時間: 11:00 - 23:00</p>
-                            <a href="{{ route('shops.show', ['shop' => \App\Models\Shop::where('name', 'ラーメン潮屋 大阪難波店')->first()->id ?? 1]) }}" class="inline-block bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300">店舗詳細を見る</a>
-                        </div>
-                        <div class="md:w-1/2 p-4">
-                            <img src="https://placehold.co/600x300/E0E0E0/000000?text=Google+Map" alt="地図" class="w-full h-auto rounded-md shadow-md">
-                        </div>
+
+                {{-- セッションメッセージの表示 --}}
+                @if (session('info'))
+                    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        {{ session('info') }}
                     </div>
-                </div>
+                @endif
+
+                {{-- 近くの店舗がある場合のみ表示 --}}
+                @if ($nearbyShops->isNotEmpty())
+                    @foreach ($nearbyShops as $shop)
+                        <div class="bg-white rounded-lg shadow-lg p-6 mb-6"> {{-- 各店舗のカード --}}
+                            <div class="md:flex md:items-center">
+                                <div class="md:w-1/2 p-4">
+                                    <h4 class="text-2xl font-semibold text-gray-800 mb-4">{{ $shop->name }}</h4>
+                                    <p class="text-gray-700 mb-2">住所: {{ $shop->address }}</p>
+                                    <p class="text-gray-700 mb-2">電話: {{ $shop->phone_number }}</p>
+                                    <p class="text-gray-700 mb-4">営業時間: {{ $shop->business_hours ?? '不明' }}</p>
+                                    {{-- 距離を表示 --}}
+                                    @if (isset($shop->distance))
+                                        <p class="text-gray-600 text-sm mb-4">
+                                            現在地から約 **{{ number_format($shop->distance / 1000, 1) }} km**
+                                        </p>
+                                    @endif
+                                    <a href="{{ route('shops.show', $shop) }}" class="inline-block bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300">店舗詳細を見る</a>
+                                </div>
+                                <div class="md:w-1/2 p-4">
+                                    <img src="https://placehold.co/600x300/E0E0E0/000000?text=Google+Map" alt="地図" class="w-full h-auto rounded-md shadow-md">
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    {{-- 近くの店舗が見つからなかった場合、または位置情報がまだ取得されていない場合の表示 --}}
+                    <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                        <p class="text-gray-700">
+                            位置情報を許可すると、お近くの店舗が表示されます。
+                            <br>
+                            または、現在地から50km圏内に店舗が見つかりませんでした。
+                        </p>
+                    </div>
+                @endif
+
                 <div class="text-center mt-8">
                     <a href="{{ route('shops.index') }}" class="inline-block bg-gray-700 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-800 transition duration-300">全ての店舗を見る</a>
                 </div>
             </div>
         </section>
 
-        <!-- おすすめメニューセクション -->
         <section class="featured-menu-section">
             <div class="container mx-auto">
                 <h3 class="text-3xl font-bold text-center text-gray-800 mb-8">おすすめメニュー</h3>
@@ -274,4 +296,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
-</x-app-layout> {{-- ★この行を追加！ --}}
+</x-app-layout>
