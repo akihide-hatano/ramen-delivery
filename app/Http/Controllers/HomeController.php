@@ -24,22 +24,21 @@ class HomeController extends Controller
         $userLon = (float)$request->query('lon'); // floatにキャスト
 
         if ($userLat && $userLon) {
-            // データベースのST_Distance関数を使用し、距離を計算して取得
-            // 距離はメートル単位で返されます
+            // サブクエリを使用して距離を計算し、その結果を外部クエリでフィルタリング・ソート
             $nearbyShops = Shop::select('shops.*') // Shopモデルの全カラムを選択
-                // ★ここをPostgreSQL/PostGIS用に修正★
-                // ST_Distance(店舗のlocationカラム, ユーザーの位置情報を表すPointオブジェクト)
-                // ST_MakePoint(経度, 緯度) - PostGISは経度、緯度の順！
-                // ST_SetSRID(..., 4326): WGS84座標系 (4326) を設定
-                // ::geography: geography型にキャストして地球の丸みを考慮した正確な距離計算を行う
                 ->selectRaw('ST_Distance(location, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography) AS distance', [$userLon, $userLat])
                 ->whereNotNull('location') // locationカラムがある店舗のみを対象
-                ->having('distance', '<', 50000) // 例: 50km (50000メートル) 以内の店舗
                 ->orderBy('distance') // 距離が近い順にソート
                 ->limit(5) // 最大5件取得
                 ->get();
-            
-            dd($nearbyShops); // ★デバッグ用: これでデータを確認★
+
+            // ここで、取得したコレクションに対してPHP側でフィルタリングを行う
+            // データベース側でhavingを使わず、PHP側で処理することでエラーを回避
+            $nearbyShops = $nearbyShops->filter(function ($shop) {
+                return $shop->distance < 50000; // 50km (50000メートル) 以内の店舗
+            })->values(); // フィルタリング後にインデックスをリセット
+
+            // dd($nearbyShops); // ★デバッグ用: これでデータを確認★ // 動作確認後、この行は削除してください
 
             if ($nearbyShops->isEmpty()) {
                 session()->flash('info', 'お近くに店舗は見つかりませんでした。');
