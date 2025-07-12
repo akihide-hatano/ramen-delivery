@@ -78,15 +78,15 @@
                     </div>
                 </div>
 
-                {{-- 地図 --}}
+{{-- 地図 --}}
                 <div>
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">地図</h2>
                     @if ($shop->lat && $shop->lon)
-                        @php
-                            $apiKey = env('GOOGLE_MAPS_API_KEY');
-                            // ★★★ここを修正★★★
-                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$shop->lat},{$shop->lon}";
-                        @endphp
+@php
+    $apiKey = env('Maps_API_KEY'); // .envのキー名に合わせてください
+    $embedSrc = "https://www.google.com/maps/embed/v1/place?key=" . $apiKey . "&q=" . $shop->lat . "," . $shop->lon;
+@endphp
+                        <p>APIキーの値: <strong>{{ $apiKey }}</strong></p> {{-- ★ここを追加★ --}}
                         <iframe
                             width="100%"
                             height="450"
@@ -98,12 +98,12 @@
                             class="rounded-lg shadow-md"
                         ></iframe>
                     @elseif ($shop->address)
-                        @php
-                            $apiKey = env('GOOGLE_MAPS_API_KEY');
-                            // ★★★ここを修正★★★
-                            $encodedAddress = urlencode($shop->address);
-                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$encodedAddress}";
-                        @endphp
+@php
+    $apiKey = env('Maps_API_KEY'); // .envのキー名に合わせてください
+    $encodedAddress = urlencode($shop->address);
+    $embedSrc = "https://www.google.com/maps/embed/v1/place?key=" . $apiKey . "&q=" . $encodedAddress;
+@endphp
+                        <p>APIキーの値: <strong>{{ $apiKey }}</strong></p> {{-- ★ここにも追加★ --}}
                         <iframe
                             width="100%"
                             height="450"
@@ -120,7 +120,6 @@
                         </div>
                     @endif
                 </div>
-            </div>
 
             {{-- この店舗が提供する商品リスト --}}
             @if ($shop->products->isNotEmpty())

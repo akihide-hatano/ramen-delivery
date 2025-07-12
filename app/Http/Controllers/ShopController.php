@@ -46,10 +46,17 @@ class ShopController extends Controller
 
     public function show(Shop $shop)
     {
-         // Shopモデルにproductsリレーションがあれば、with('products')で関連する商品も一緒に読み込む
-        // これにより、ビューで $shop->products として商品にアクセスできます
-        $shop->load('products');
-        // 取得した店舗データを 'shops.show' ビューに渡します。
+         $shop->load('products');
+
+        // ★★★ここを追加してください★★★
+        // 環境変数と$shopオブジェクトの内容を同時に確認
+        // dd([
+        //     'Maps_API_KEY_from_env' => env('Maps_API_KEY'),
+        //     'shop_lat' => $shop->lat,
+        //     'shop_lon' => $shop->lon,
+        //     'shop_address' => $shop->address,
+        // ]);
+
         return view('shops.show', compact('shop'));
     }
 
