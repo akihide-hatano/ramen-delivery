@@ -17,7 +17,6 @@ class ShopController extends Controller
     {
         $shops = Shop::all();
         dump($shops);
-        // 取得した店舗データを 'shops.index' ビューに渡します。
         return view('shops.index', compact('shops'));
     }
 }
