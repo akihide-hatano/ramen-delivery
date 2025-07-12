@@ -12,13 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->text('description')->nullable(); // description も追加しておくと良いでしょう
-            // ここに parent_id カラムを追加します
-            // parent_id は nullable で、categories テーブル自身の id を参照する外部キーとします
-            $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
-            $table->timestamps();
+            $table->id(); // カテゴリID (BIGINT, PK, AUTO_INCREMENT)
+            $table->string('name', 100)->unique(); // カテゴリ名 (ユニーク制約を追加)
+            $table->text('description')->nullable(); // カテゴリの説明
+
+            // 親カテゴリID (自己参照リレーションのため)
+            // nullを許容することで、最上位の親カテゴリを表現
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('categories') // 'categories' テーブルを参照
+                ->onDelete('cascade'); // 親カテゴリが削除されたら、子カテゴリも削除
+
+            $table->timestamps(); // created_at と updated_at
         });
     }
 

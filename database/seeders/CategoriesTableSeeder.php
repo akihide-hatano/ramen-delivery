@@ -13,41 +13,43 @@ class CategoriesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        // 既存データをクリアしてから新しいデータを投入する場合（開発環境向け）
-        // DB::table('categories')->truncate();
-
-        // 親カテゴリから順に投入していく
-        // この後の子カテゴリの登録で必要になるため、idを先に取得しておく
-        DB::table('categories')->insert([
+        $categoriesToInsert = [
             [
                 'name' => 'ラーメン',
                 'description' => '各種ラーメン',
-                'parent_id' => null, // 親カテゴリ
+                'parent_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'サイドメニュー',
                 'description' => 'ラーメンと一緒にお楽しみいただけるメニュー',
-                'parent_id' => null, // 親カテゴリ
+                'parent_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'ドリンク',
                 'description' => '各種お飲み物',
-                'parent_id' => null, // 親カテゴリ
+                'parent_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'トッピング',
                 'description' => 'ラーメンに追加できる具材',
-                'parent_id' => null, // 親カテゴリ
+                'parent_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ];
+
+        // 既存のカテゴリがなければ挿入 (重複挿入防止の簡易策)
+        foreach ($categoriesToInsert as $category) {
+            if (!DB::table('categories')->where('name', $category['name'])->exists()) {
+                DB::table('categories')->insert($category);
+            }
+        }
 
         // 親カテゴリのIDを取得
         $ramenCategoryId = DB::table('categories')->where('name', 'ラーメン')->first()->id;
@@ -55,9 +57,9 @@ class CategoriesTableSeeder extends Seeder
         $drinkCategoryId = DB::table('categories')->where('name', 'ドリンク')->first()->id;
         $toppingCategoryId = DB::table('categories')->where('name', 'トッピング')->first()->id;
 
-        // 子カテゴリを投入
-        DB::table('categories')->insert([
-            // ラーメンの子カテゴリ
+        // 子カテゴリを投入 (重複挿入防止の簡易策)
+        $subCategoriesToInsert = [
+            // ラーメンの子カテゴリ（3種類を維持）
             [
                 'name' => '醤油ラーメン',
                 'description' => '伝統的な醤油ベースのラーメン',
@@ -79,6 +81,7 @@ class CategoriesTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            // 塩ラーメンも残しておきます。必要なければ削除してください。
             [
                 'name' => '塩ラーメン',
                 'description' => 'あっさりとした塩味のラーメン',
@@ -86,6 +89,7 @@ class CategoriesTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+
             // サイドメニューの子カテゴリ
             [
                 'name' => '唐揚げ',
@@ -108,6 +112,22 @@ class CategoriesTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            // 新規追加
+            [
+                'name' => 'ご飯物',
+                'description' => 'ご飯系のサイドメニュー',
+                'parent_id' => $sideMenuCategoryId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => '一品料理',
+                'description' => '単品で楽しめる料理',
+                'parent_id' => $sideMenuCategoryId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
             // ドリンクの子カテゴリ
             [
                 'name' => 'ビール',
@@ -123,6 +143,58 @@ class CategoriesTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+            // 新規追加
+            [
+                'name' => '日本酒',
+                'description' => '日本各地の日本酒',
+                'parent_id' => $drinkCategoryId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'その他アルコール',
+                'description' => 'その他のアルコール飲料',
+                'parent_id' => $drinkCategoryId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // トッピングの子カテゴリ
+            [
+                'name' => 'チャーシュー',
+                'description' => '追加の特製チャーシュー',
+                'parent_id' => $toppingCategoryId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => '味玉',
+                'description' => '半熟の味付け煮卵',
+                'parent_id' => $toppingCategoryId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            // 新規追加
+            [
+                'name' => 'ネギ',
+                'description' => '新鮮な青ネギ',
+                'parent_id' => $toppingCategoryId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'メンマ',
+                'description' => 'コリコリとしたメンマ',
+                'parent_id' => $toppingCategoryId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
+
+        foreach ($subCategoriesToInsert as $subCategory) {
+            if (!DB::table('categories')->where('name', $subCategory['name'])->exists()) {
+                DB::table('categories')->insert($subCategory);
+            }
+        }
     }
 }
