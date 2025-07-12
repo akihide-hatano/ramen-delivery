@@ -44,5 +44,16 @@ class ShopController extends Controller
         return view('shops.index', compact('shops', 'prefecture','search','shopCount'));
     }
 
-    // 必要であれば、ここに他のメソッド（例: show, create, storeなど）を追加します。
+    public function show(Shop $shop)
+    {
+         // Shopモデルにproductsリレーションがあれば、with('products')で関連する商品も一緒に読み込む
+        // これにより、ビューで $shop->products として商品にアクセスできます
+        $shop->load('products');
+
+        dd($shop);
+
+        // 取得した店舗データを 'shops.show' ビューに渡します。
+        return view('shops.show', compact('shop'));
+    }
+
 }
