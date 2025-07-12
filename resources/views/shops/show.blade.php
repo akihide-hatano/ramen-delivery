@@ -44,23 +44,70 @@
                         <p class="text-gray-700 mt-4 leading-relaxed">{{ $shop->description }}</p>
                     @endif
 
-                    {{-- 設備情報 --}}
+{{-- 設備情報 --}}
                     <div class="mt-6">
                         <h3 class="text-xl font-semibold mb-3">設備</h3>
                         <ul class="grid grid-cols-2 gap-2 text-gray-700">
-                            {{-- ★★★ここから追加/修正★★★ --}}
-                            @if ($shop->has_parking)
-                                <li class="col-span-2 mt-4 flex items-center"> {{-- 2列分を使い、上部に余白を追加 --}}
-                                    {{-- public/images/parking-icon.png へのパスを指定 --}}
-                                    <img src="{{ asset('images/parking-icon.png') }}" alt="駐車場ありアイコン" class="h-8 w-8 mr-2 object-contain">
-                                </li>
-                            @endif
-                            {{-- ★★★ここまで追加/修正★★★ --}}
-                            <li class="flex items-center"><i class="fas fa-chair mr-2 text-blue-500"></i>テーブル席: {{ $shop->has_table_seats ? 'あり' : 'なし' }}</li>
-                            <li class="flex items-center"><i class="fas fa-chair mr-2 text-blue-500"></i>カウンター席: {{ $shop->has_counter_seats ? 'あり' : 'なし' }}</li>
-                            <li class="flex items-center"><i class="fas fa-money-bill-wave mr-2 text-green-500"></i>現金払い: {{ $shop->accept_cash ? '可' : '不可' }}</li>
-                            <li class="flex items-center"><i class="fas fa-credit-card mr-2 text-green-500"></i>カード払い: {{ $shop->accept_credit_card ? '可' : '不可' }}</li>
-                            <li class="flex items-center"><i class="fas fa-wallet mr-2 text-green-500"></i>電子マネー: {{ $shop->accept_e_money ? '可' : '不可' }}</li>
+                            {{-- 駐車場 --}}
+                            <li class="flex items-center">
+                                @if ($shop->has_parking)
+                                    <img src="{{ asset('images/features/parking_available.png') }}" alt="駐車場あり" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-800 font-medium">駐車場あり</span>
+                                @else
+                                    <img src="{{ asset('images/features/parking_unavailable.png') }}" alt="駐車場なし" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-500">駐車場なし</span>
+                                @endif
+                            </li>
+                            {{-- テーブル席 --}}
+                            <li class="flex items-center">
+                                @if ($shop->has_table_seats)
+                                    <img src="{{ asset('images/features/table_seat_available.png') }}" alt="テーブル席あり" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-800 font-medium">テーブル席あり</span>
+                                @else
+                                    <img src="{{ asset('images/features/table_seat_unavailable.png') }}" alt="テーブル席なし" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-500">テーブル席なし</span>
+                                @endif
+                            </li>
+                            {{-- カウンター席 --}}
+                            <li class="flex items-center">
+                                @if ($shop->has_counter_seats)
+                                    <img src="{{ asset('images/features/counter_seat_available.png') }}" alt="カウンター席あり" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-800 font-medium">カウンター席あり</span>
+                                @else
+                                    <img src="{{ asset('images/features/counter_seat_unavailable.png') }}" alt="カウンター席なし" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-500">カウンター席なし</span>
+                                @endif
+                            </li>
+                            {{-- 現金払い --}}
+                            <li class="flex items-center">
+                                @if ($shop->accept_cash)
+                                    <img src="{{ asset('images/features/cash_available.png') }}" alt="現金払い可" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-800 font-medium">現金払い可</span>
+                                @else
+                                    <img src="{{ asset('images/features/cash_unavailable.png') }}" alt="現金払い不可" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-500">現金払い不可</span>
+                                @endif
+                            </li>
+                            {{-- カード払い --}}
+                            <li class="flex items-center">
+                                @if ($shop->accept_credit_card)
+                                    <img src="{{ asset('images/features/credit_card_available.png') }}" alt="カード払い可" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-800 font-medium">カード払い可</span>
+                                @else
+                                    <img src="{{ asset('images/features/credit_card_unavailable.png') }}" alt="カード払い不可" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-500">カード払い不可</span>
+                                @endif
+                            </li>
+                            {{-- 電子マネー --}}
+                            <li class="flex items-center">
+                                @if ($shop->accept_e_money)
+                                    <img src="{{ asset('images/features/e_money_available.png') }}" alt="電子マネー可" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-800 font-medium">電子マネー可</span>
+                                @else
+                                    <img src="{{ asset('images/features/e_money_unavailable.png') }}" alt="電子マネー不可" class="h-6 w-6 mr-2 object-contain">
+                                    <span class="text-gray-500">電子マネー不可</span>
+                                @endif
+                            </li>
                         </ul>
                     </div>
 
