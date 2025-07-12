@@ -77,49 +77,46 @@
                         </div>
                     </div>
                 </div>
-
+{{-- resources/views/shops/show.blade.php の地図部分 --}}
 {{-- 地図 --}}
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">地図</h2>
-                    @if ($shop->lat && $shop->lon)
-@php
-    $apiKey = env('Maps_API_KEY'); // .envのキー名に合わせてください
-    $embedSrc = "https://www.google.com/maps/embed/v1/place?key=" . $apiKey . "&q=" . $shop->lat . "," . $shop->lon;
-@endphp
-                        <p>APIキーの値: <strong>{{ $apiKey }}</strong></p> {{-- ★ここを追加★ --}}
-                        <iframe
-                            width="100%"
-                            height="450"
-                            frameborder="0"
-                            style="border:0"
-                            src="{{ $embedSrc }}"
-                            allowfullscreen
-                            loading="lazy"
-                            class="rounded-lg shadow-md"
-                        ></iframe>
-                    @elseif ($shop->address)
-@php
-    $apiKey = env('Maps_API_KEY'); // .envのキー名に合わせてください
-    $encodedAddress = urlencode($shop->address);
-    $embedSrc = "https://www.google.com/maps/embed/v1/place?key=" . $apiKey . "&q=" . $encodedAddress;
-@endphp
-                        <p>APIキーの値: <strong>{{ $apiKey }}</strong></p> {{-- ★ここにも追加★ --}}
-                        <iframe
-                            width="100%"
-                            height="450"
-                            frameborder="0"
-                            style="border:0"
-                            src="{{ $embedSrc }}"
-                            allowfullscreen
-                            loading="lazy"
-                            class="rounded-lg shadow-md"
-                        ></iframe>
-                    @else
-                        <div class="bg-gray-100 p-4 rounded-lg text-center text-gray-600 h-full flex items-center justify-center">
-                            <p>地図情報がありません。</p>
-                        </div>
-                    @endif
-                </div>
+<div>
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">地図</h2>
+    {{-- shop->lat と shop->lon があればそちらを優先 --}}
+    @if ($shop->lat && $shop->lon)
+        <iframe
+            width="100%"
+            height="450"
+            frameborder="0"
+            style="border:0"
+            {{-- ★★★ここを修正します：@attribute ディレクティブを使う★★★ --}}
+            @attribute('src', "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$shop->lat},{$shop->lon}")
+            allowfullscreen
+            loading="lazy"
+            class="rounded-lg shadow-md"
+        ></iframe>
+    {{-- 緯度経度がなく、住所があれば住所で検索 --}}
+    @elseif ($shop->address)
+        @php
+            $encodedAddress = urlencode($shop->address);
+        @endphp
+        <iframe
+            width="100%"
+            height="450"
+            frameborder="0"
+            style="border:0"
+            {{-- ★★★ここを修正します：@attribute ディレクティブを使う★★★ --}}
+            @attribute('src', "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$encodedAddress}")
+            allowfullscreen
+            loading="lazy"
+            class="rounded-lg shadow-md"
+        ></iframe>
+    @else
+        {{-- 地図情報がない場合のメッセージ --}}
+        <div class="bg-gray-100 p-4 rounded-lg text-center text-gray-600 h-full flex items-center justify-center">
+            <p>地図情報がありません。</p>
+        </div>
+    @endif
+</div>
 
             {{-- この店舗が提供する商品リスト --}}
             @if ($shop->products->isNotEmpty())

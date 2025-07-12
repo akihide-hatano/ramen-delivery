@@ -56,8 +56,10 @@ class ShopController extends Controller
         //     'shop_lon' => $shop->lon,
         //     'shop_address' => $shop->address,
         // ]);
-
-        return view('shops.show', compact('shop'));
+                // ★★★ここを追加★★★
+        // APIキーをコントローラーで取得し、ビューに渡す
+        $apiKey = env('Maps_API_KEY');
+        return view('shops.show', compact('shop','apiKey'));
     }
 
 }
