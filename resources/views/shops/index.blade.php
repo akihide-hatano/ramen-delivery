@@ -28,6 +28,26 @@
     <main class="container mx-auto mt-8 p-4">
         <h2 class="text-4xl font-bold text-center text-gray-800 mb-8">全ての店舗</h2>
 
+        {{-- ★ここからフィルターリンクを追加★ --}}
+        <div class="flex justify-center space-x-4 mb-8">
+            <a href="{{ route('shops.index') }}"
+               class="px-5 py-2 rounded-full font-semibold transition duration-300
+               {{ !$prefecture ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                全ての店舗
+            </a>
+            <a href="{{ route('shops.index', ['prefecture' => '京都府']) }}"
+               class="px-5 py-2 rounded-full font-semibold transition duration-300
+               {{ $prefecture === '京都府' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                京都の店舗
+            </a>
+            <a href="{{ route('shops.index', ['prefecture' => '大阪府']) }}"
+               class="px-5 py-2 rounded-full font-semibold transition duration-300
+               {{ $prefecture === '大阪府' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                大阪の店舗
+            </a>
+        </div>
+        {{-- ★フィルターリンクここまで★ --}}
+
         @if ($shops->isEmpty())
             <p class="text-center text-gray-600">現在、登録されている店舗はありません。</p>
         @else
@@ -63,5 +83,6 @@
 
 {{-- 必要なJavaScriptをプッシュ（このページ固有のJSがあれば） --}}
 @push('scripts')
-{{-- ここにこのページ固有のJavaScriptを記述 --}}
+{{-- Font Awesome のCDNをheadに含めていない場合、ここで読み込むとアイコンが表示されます --}}
+{{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> --}}
 @endpush
