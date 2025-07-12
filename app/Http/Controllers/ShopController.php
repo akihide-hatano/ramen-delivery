@@ -19,6 +19,8 @@ class ShopController extends Controller
         // デフォルトはnullで、全ての店舗を意味します。
         $prefecture = $request->query('prefecture');
 
+        $search = $request->query('search');
+
         // Shopモデルのクエリビルダを開始
         $query = Shop::query();
 
@@ -28,12 +30,20 @@ class ShopController extends Controller
             $query->where('address', 'like', $prefecture . '%');
         }
 
+        // 'search' パラメータが存在する場合、店舗名で絞り込みます。
+        // 部分一致検索のため、両端に '%' を追加します。
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
         // 絞り込まれた店舗を取得します。
         // 店舗数が多い場合は、Shop::paginate(10) のようにページネーションを使うことを検討してください。
         $shops = $query->get();
 
+        // dd('$search');
+
         // 取得した店舗データと現在のフィルタリング状態を 'shops.index' ビューに渡します。
-        return view('shops.index', compact('shops', 'prefecture'));
+        return view('shops.index', compact('shops', 'prefecture','search'));
     }
 
     // 必要であれば、ここに他のメソッド（例: show, create, storeなど）を追加します。
