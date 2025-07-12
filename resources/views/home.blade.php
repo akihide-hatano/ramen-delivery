@@ -99,7 +99,44 @@
                                     <a href="{{ route('shops.show', $shop) }}" class="inline-block bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300">店舗詳細を見る</a>
                                 </div>
                                 <div class="md:w-1/2 p-4">
-                                    <img src="https://placehold.co/600x300/E0E0E0/000000?text=Google+Map" alt="地図" class="w-full h-auto rounded-md shadow-md">
+                                    {{-- Google Maps Embed API を使用して地図を埋め込む --}}
+                                    @if ($shop->lat && $shop->lon)
+                                        @php
+                                            // 緯度経度がある場合、それを使って地図URLを生成
+                                            // ★★★ここを修正★★★：Google Maps Embed APIの正しいURL形式に！
+                                            $apiKey = env('Maps_API_KEY');
+                                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$shop->lat},{$shop->lon}";
+                                        @endphp
+                                        <iframe
+                                            width="100%"
+                                            height="300"
+                                            frameborder="0"
+                                            style="border:0"
+                                            src="{{ $embedSrc }}"
+                                            allowfullscreen
+                                            loading="lazy"
+                                        ></iframe>
+                                    @elseif ($shop->address)
+                                        @php
+                                            // 緯度経度がない場合、住所で検索して地図URLを生成
+                                            // ★★★ここを修正★★★：Google Maps Embed APIの正しいURL形式に！
+                                            $apiKey = env('Maps_API_KEY');
+                                            $encodedAddress = urlencode($shop->address);
+                                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$encodedAddress}";
+                                        @endphp
+                                        <iframe
+                                            width="100%"
+                                            height="300"
+                                            frameborder="0"
+                                            style="border:0"
+                                            src="{{ $embedSrc }}"
+                                            allowfullscreen
+                                            loading="lazy"
+                                        ></iframe>
+                                    @else
+                                        {{-- 地図情報がない場合のフォールバック画像 --}}
+                                        <img src="https://placehold.co/600x300/E0E0E0/000000?text=Map+Data+Missing" alt="地図" class="w-full h-auto rounded-md shadow-md">
+                                    @endif
                                 </div>
                             </div>
                         </div>

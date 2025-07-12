@@ -22,8 +22,6 @@ class HomeController extends Controller
         if ($userLat && $userLon) {
             $nearbyShops = Shop::select('shops.*')
                 ->selectRaw('ST_Distance(location, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography) AS distance', [$userLon, $userLat])
-                // ★ここを修正します★
-                // geography型からgeometry型にキャストしてからST_Y/ST_Xを使用
                 ->selectRaw('ST_Y(location::geometry) AS lat, ST_X(location::geometry) AS lon')
                 ->whereNotNull('location')
                 ->orderBy('distance')
