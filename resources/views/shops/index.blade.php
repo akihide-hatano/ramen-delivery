@@ -31,22 +31,22 @@
         {{-- ★ここからフィルターリンクを追加★ --}}
         <div class="flex justify-center space-x-4 mb-8">
             <a href="{{ route('shops.index') }}"
-               class="px-5 py-2 rounded-full font-semibold transition duration-300
-               {{ !$prefecture ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+            class="px-5 py-2 rounded-full font-semibold transition duration-300
+            {{ !$prefecture ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                 全ての店舗
             </a>
             <a href="{{ route('shops.index', ['prefecture' => '京都府']) }}"
-               class="px-5 py-2 rounded-full font-semibold transition duration-300
-               {{ $prefecture === '京都府' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+            class="px-5 py-2 rounded-full font-semibold transition duration-300
+            {{ $prefecture === '京都府' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                 京都の店舗
             </a>
             <a href="{{ route('shops.index', ['prefecture' => '大阪府']) }}"
-               class="px-5 py-2 rounded-full font-semibold transition duration-300
-               {{ $prefecture === '大阪府' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+            class="px-5 py-2 rounded-full font-semibold transition duration-300
+            {{ $prefecture === '大阪府' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                 大阪の店舗
             </a>
         </div>
-         {{-- ★ここから検索フォームを追加★ --}}
+        {{-- ★ここから検索フォームを追加★ --}}
         <div class="flex justify-center mb-8">
             <form action="{{ route('shops.index') }}" method="GET" class="flex items-center space-x-2 w-full max-w-md">
                 {{-- 隠しフィールドで現在の都道府県フィルターを保持 --}}
@@ -54,8 +54,8 @@
                     <input type="hidden" name="prefecture" value="{{ $prefecture }}">
                 @endif
                 <input type="text" name="search" placeholder="店舗名で検索..."
-                       value="{{ $search ?? '' }}" {{-- 現在の検索キーワードを保持 --}}
-                       class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    value="{{ $search ?? '' }}" {{-- 現在の検索キーワードを保持 --}}
+                    class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
                 <button type="submit" class="bg-blue-500 text-white px-5 py-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-300">
                     検索
                 </button>

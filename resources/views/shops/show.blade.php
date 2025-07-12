@@ -48,7 +48,14 @@
                     <div class="mt-6">
                         <h3 class="text-xl font-semibold mb-3">設備</h3>
                         <ul class="grid grid-cols-2 gap-2 text-gray-700">
-                            <li class="flex items-center"><i class="fas fa-parking mr-2 text-blue-500"></i>駐車場: {{ $shop->has_parking ? 'あり' : 'なし' }}</li>
+                            {{-- ★★★ここから追加/修正★★★ --}}
+                            @if ($shop->has_parking)
+                                <li class="col-span-2 mt-4 flex items-center"> {{-- 2列分を使い、上部に余白を追加 --}}
+                                    {{-- public/images/parking-icon.png へのパスを指定 --}}
+                                    <img src="{{ asset('images/parking-icon.png') }}" alt="駐車場ありアイコン" class="h-8 w-8 mr-2 object-contain">
+                                </li>
+                            @endif
+                            {{-- ★★★ここまで追加/修正★★★ --}}
                             <li class="flex items-center"><i class="fas fa-chair mr-2 text-blue-500"></i>テーブル席: {{ $shop->has_table_seats ? 'あり' : 'なし' }}</li>
                             <li class="flex items-center"><i class="fas fa-chair mr-2 text-blue-500"></i>カウンター席: {{ $shop->has_counter_seats ? 'あり' : 'なし' }}</li>
                             <li class="flex items-center"><i class="fas fa-money-bill-wave mr-2 text-green-500"></i>現金払い: {{ $shop->accept_cash ? '可' : '不可' }}</li>
