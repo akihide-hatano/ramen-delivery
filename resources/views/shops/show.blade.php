@@ -24,7 +24,7 @@
         </div>
     </header>
 
-  {{-- メインコンテンツ --}}
+    {{-- メインコンテンツ --}}
     <main class="container mx-auto mt-8 p-4">
         <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
             <h1 class="text-4xl font-bold text-gray-800 mb-6 text-center">{{ $shop->name }}</h1>
@@ -84,7 +84,6 @@
                     @if ($shop->lat && $shop->lon)
                         @php
                             $apiKey = env('GOOGLE_MAPS_API_KEY');
-                            // ★★★ここを修正★★★
                             $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$shop->lat},{$shop->lon}";
                         @endphp
                         <iframe
@@ -100,7 +99,6 @@
                     @elseif ($shop->address)
                         @php
                             $apiKey = env('GOOGLE_MAPS_API_KEY');
-                            // ★★★ここを修正★★★
                             $encodedAddress = urlencode($shop->address);
                             $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$encodedAddress}";
                         @endphp
@@ -153,15 +151,13 @@
         </div>
     </main>
 
-
     {{-- フッター部分 --}}
     <footer class="bg-gray-800 text-white p-6 text-center mt-12">
         <p>&copy; {{ date('Y') }} ラーメン潮屋. All rights reserved.</p>
     </footer>
 </x-app-layout>
 
-{{-- 必要なJavaScriptをプッシュ（このページ固有のJSがあれば） --}}
 @push('scripts')
 {{-- Font Awesome のCDNをheadに含めていない場合、ここで読み込むとアイコンが表示されます --}}
-{{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 @endpush
