@@ -24,131 +24,78 @@
         </div>
     </header>
 
-  {{-- メインコンテンツ --}}
+    {{-- メインコンテンツ --}}
     <main class="container mx-auto mt-8 p-4">
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-6 text-center">{{ $shop->name }}</h1>
+        <h2 class="text-4xl font-bold text-center text-gray-800 mb-8">全ての店舗</h2>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {{-- 店舗情報と画像ギャラリー --}}
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">店舗情報</h2>
-                    <p class="text-lg mb-2"><i class="fas fa-map-marker-alt mr-2 text-red-500"></i>住所: {{ $shop->address }}</p>
-                    <p class="text-lg mb-2"><i class="fas fa-phone mr-2 text-red-500"></i>電話: {{ $shop->phone_number }}</p>
-                    <p class="text-lg mb-2"><i class="fas fa-clock mr-2 text-red-500"></i>営業時間: {{ $shop->business_hours ?? '不明' }}</p>
-                    @if ($shop->regular_holiday)
-                        <p class="text-lg mb-2"><i class="fas fa-calendar-times mr-2 text-red-500"></i>定休日: {{ $shop->regular_holiday }}</p>
-                    @endif
+        {{-- ★ここからフィルターリンクを追加★ --}}
+        <div class="flex justify-center space-x-4 mb-8">
+            <a href="{{ route('shops.index') }}"
+               class="px-5 py-2 rounded-full font-semibold transition duration-300
+               {{ !$prefecture ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                全ての店舗
+            </a>
+            <a href="{{ route('shops.index', ['prefecture' => '京都府']) }}"
+               class="px-5 py-2 rounded-full font-semibold transition duration-300
+               {{ $prefecture === '京都府' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                京都の店舗
+            </a>
+            <a href="{{ route('shops.index', ['prefecture' => '大阪府']) }}"
+               class="px-5 py-2 rounded-full font-semibold transition duration-300
+               {{ $prefecture === '大阪府' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                大阪の店舗
+            </a>
+        </div>
+         {{-- ★ここから検索フォームを追加★ --}}
+        <div class="flex justify-center mb-8">
+            <form action="{{ route('shops.index') }}" method="GET" class="flex items-center space-x-2 w-full max-w-md">
+                {{-- 隠しフィールドで現在の都道府県フィルターを保持 --}}
+                @if ($prefecture)
+                    <input type="hidden" name="prefecture" value="{{ $prefecture }}">
+                @endif
+                <input type="text" name="search" placeholder="店舗名で検索..."
+                       value="{{ $search ?? '' }}" {{-- 現在の検索キーワードを保持 --}}
+                       class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                <button type="submit" class="bg-blue-500 text-white px-5 py-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-300">
+                    検索
+                </button>
+            </form>
+        </div>
 
-                    @if ($shop->description)
-                        <p class="text-gray-700 mt-4 leading-relaxed">{{ $shop->description }}</p>
-                    @endif
+        {{-- ★ここから検索件数の表示を追加★ --}}
+        <div class="text-center text-xl text-gray-700 mb-8">
+            <p>{{ $shopCount }}件見つかりました</p>
+        </div>
+        {{-- ★検索件数表示ここまで★ --}}
+        {{-- ★検索フォームここまで★ --}}
+        {{-- ★フィルターリンクここまで★ --}}
 
-                    {{-- 設備情報 --}}
-                    <div class="mt-6">
-                        <h3 class="text-xl font-semibold mb-3">設備</h3>
-                        <ul class="grid grid-cols-2 gap-2 text-gray-700">
-                            <li class="flex items-center"><i class="fas fa-parking mr-2 text-blue-500"></i>駐車場: {{ $shop->has_parking ? 'あり' : 'なし' }}</li>
-                            <li class="flex items-center"><i class="fas fa-chair mr-2 text-blue-500"></i>テーブル席: {{ $shop->has_table_seats ? 'あり' : 'なし' }}</li>
-                            <li class="flex items-center"><i class="fas fa-chair mr-2 text-blue-500"></i>カウンター席: {{ $shop->has_counter_seats ? 'あり' : 'なし' }}</li>
-                            <li class="flex items-center"><i class="fas fa-money-bill-wave mr-2 text-green-500"></i>現金払い: {{ $shop->accept_cash ? '可' : '不可' }}</li>
-                            <li class="flex items-center"><i class="fas fa-credit-card mr-2 text-green-500"></i>カード払い: {{ $shop->accept_credit_card ? '可' : '不可' }}</li>
-                            <li class="flex items-center"><i class="fas fa-wallet mr-2 text-green-500"></i>電子マネー: {{ $shop->accept_e_money ? '可' : '不可' }}</li>
-                        </ul>
-                    </div>
-
-                    {{-- 店舗画像ギャラリー --}}
-                    <div class="mt-8">
-                        <h3 class="text-xl font-semibold mb-3">ギャラリー</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            @if ($shop->photo_1_url)
-                                <img src="{{ $shop->photo_1_url }}" alt="{{ $shop->name }} - 画像1" class="rounded-lg shadow-md w-full h-48 object-cover">
-                            @endif
-                            @if ($shop->photo_2_url)
-                                <img src="{{ $shop->photo_2_url }}" alt="{{ $shop->name }} - 画像2" class="rounded-lg shadow-md w-full h-48 object-cover">
-                            @endif
-                            @if ($shop->photo_3_url)
-                                <img src="{{ $shop->photo_3_url }}" alt="{{ $shop->name }} - 画像3" class="rounded-lg shadow-md w-full h-48 object-cover">
-                            @endif
-                            {{-- 画像がない場合のプレースホルダー --}}
-                            @if (!$shop->photo_1_url && !$shop->photo_2_url && !$shop->photo_3_url)
-                                <img src="https://placehold.co/600x400/E0E0E0/000000?text=No+Images" alt="画像なし" class="rounded-lg shadow-md w-full h-48 object-cover col-span-full">
-                            @endif
+        @if ($shops->isEmpty())
+            <p class="text-center text-gray-600">現在、登録されている店舗はありません。</p>
+        @else
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach ($shops as $shop)
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
+                        {{-- 店舗のメイン画像があれば表示、なければプレースホルダー --}}
+                        @if ($shop->photo_1_url)
+                            <img src="{{ $shop->photo_1_url }}" alt="{{ $shop->name }}" class="w-full h-48 object-cover">
+                        @else
+                            <img src="https://placehold.co/600x300/E0E0E0/000000?text=Shop+Image" alt="店舗画像" class="w-full h-48 object-cover">
+                        @endif
+                        <div class="p-5">
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-2 truncate">{{ $shop->name }}</h3>
+                            <p class="text-gray-700 mb-1"><i class="fas fa-map-marker-alt mr-2"></i>住所: {{ $shop->address }}</p>
+                            <p class="text-gray-700 mb-1"><i class="fas fa-phone mr-2"></i>電話: {{ $shop->phone_number }}</p>
+                            <p class="text-gray-700 mb-4"><i class="fas fa-clock mr-2"></i>営業時間: {{ $shop->business_hours ?? '不明' }}</p>
+                            <a href="{{ route('shops.show', $shop) }}" class="block text-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                                店舗詳細を見る
+                            </a>
                         </div>
                     </div>
-                </div>
-{{-- resources/views/shops/show.blade.php の地図部分 --}}
-{{-- 地図 --}}
-<div>
-    <h2 class="text-2xl font-semibold text-gray-800 mb-4">地図</h2>
-    {{-- shop->lat と shop->lon があればそちらを優先 --}}
-    @if ($shop->lat && $shop->lon)
-        <iframe
-            width="100%"
-            height="450"
-            frameborder="0"
-            style="border:0"
-            {{-- ★★★ここを修正します：@attribute ディレクティブを使う★★★ --}}
-            @attribute('src', "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$shop->lat},{$shop->lon}")
-            allowfullscreen
-            loading="lazy"
-            class="rounded-lg shadow-md"
-        ></iframe>
-    {{-- 緯度経度がなく、住所があれば住所で検索 --}}
-    @elseif ($shop->address)
-        @php
-            $encodedAddress = urlencode($shop->address);
-        @endphp
-        <iframe
-            width="100%"
-            height="450"
-            frameborder="0"
-            style="border:0"
-            {{-- ★★★ここを修正します：@attribute ディレクティブを使う★★★ --}}
-            @attribute('src', "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$encodedAddress}")
-            allowfullscreen
-            loading="lazy"
-            class="rounded-lg shadow-md"
-        ></iframe>
-    @else
-        {{-- 地図情報がない場合のメッセージ --}}
-        <div class="bg-gray-100 p-4 rounded-lg text-center text-gray-600 h-full flex items-center justify-center">
-            <p>地図情報がありません。</p>
-        </div>
-    @endif
-</div>
-
-            {{-- この店舗が提供する商品リスト --}}
-            @if ($shop->products->isNotEmpty())
-                <div class="mt-12">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">この店舗のおすすめメニュー</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        @foreach ($shop->products as $product)
-                            <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
-                                @if ($product->image_url)
-                                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-32 object-cover">
-                                @else
-                                    <img src="https://placehold.co/400x300/E0E0E0/000000?text=No+Image" alt="No Image" class="w-full h-32 object-cover">
-                                @endif
-                                <div class="p-3 text-center">
-                                    <h4 class="text-md font-semibold text-gray-800 truncate">{{ $product->name }}</h4>
-                                    <p class="text-red-600 font-bold text-lg mt-1">¥{{ number_format($product->price) }}</p>
-                                    <a href="{{ route('products.show', $product) }}" class="block text-center bg-green-500 text-white text-sm px-3 py-1 rounded-md mt-2 hover:bg-green-600 transition duration-300">詳細</a>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            <div class="mt-12 text-center">
-                <a href="{{ route('shops.index') }}" class="inline-block bg-gray-700 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-800 transition duration-300">
-                    <i class="fas fa-arrow-left mr-2"></i>店舗一覧に戻る
-                </a>
+                @endforeach
             </div>
-        </div>
+        @endif
     </main>
-
 
     {{-- フッター部分 --}}
     <footer class="bg-gray-800 text-white p-6 text-center mt-12">
