@@ -83,7 +83,6 @@
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">地図</h2>
                     @if ($shop->lat && $shop->lon)
                         @php
-                            $apiKey = env('GOOGLE_MAPS_API_KEY');
                             $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$shop->lat},{$shop->lon}";
                         @endphp
                         <iframe
@@ -98,7 +97,6 @@
                         ></iframe>
                     @elseif ($shop->address)
                         @php
-                            $apiKey = env('GOOGLE_MAPS_API_KEY');
                             $encodedAddress = urlencode($shop->address);
                             $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$encodedAddress}";
                         @endphp
