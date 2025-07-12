@@ -159,7 +159,6 @@ class CategoriesTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
-            // トッピングの子カテゴリ
             [
                 'name' => 'チャーシュー',
                 'description' => '追加の特製チャーシュー',
@@ -174,7 +173,6 @@ class CategoriesTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 新規追加
             [
                 'name' => 'ネギ',
                 'description' => '新鮮な青ネギ',
