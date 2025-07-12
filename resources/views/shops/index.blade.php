@@ -46,6 +46,22 @@
                 大阪の店舗
             </a>
         </div>
+         {{-- ★ここから検索フォームを追加★ --}}
+        <div class="flex justify-center mb-8">
+            <form action="{{ route('shops.index') }}" method="GET" class="flex items-center space-x-2 w-full max-w-md">
+                {{-- 隠しフィールドで現在の都道府県フィルターを保持 --}}
+                @if ($prefecture)
+                    <input type="hidden" name="prefecture" value="{{ $prefecture }}">
+                @endif
+                <input type="text" name="search" placeholder="店舗名で検索..."
+                       value="{{ $search ?? '' }}" {{-- 現在の検索キーワードを保持 --}}
+                       class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                <button type="submit" class="bg-blue-500 text-white px-5 py-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-300">
+                    検索
+                </button>
+            </form>
+        </div>
+        {{-- ★検索フォームここまで★ --}}
         {{-- ★フィルターリンクここまで★ --}}
 
         @if ($shops->isEmpty())
