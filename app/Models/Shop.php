@@ -32,7 +32,7 @@ class Shop extends Model
     // productsとのリレーションを定義
     public function products()
     {
-        return $this->hasMany(Product::class);
+       return $this->belongsToMany(Product::class, 'shop_products');
     }
 
     // ★★★ここからアクセサを追加★★★
