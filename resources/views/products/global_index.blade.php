@@ -1,7 +1,28 @@
 <x-app-layout>
-    {{-- page_title スロットは app-layout の中で直接定義されていないため、通常の h1 をそのまま使用するか、
-         app-layout に page_title スロットを追加することもできます。
-         今回は直接 h1 を記述します。 --}}
+    {{-- ヘッダー部分 --}}
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-red-500">ラーメン潮屋</h1>
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a href="{{ route('home') }}" class="hover:text-red-500">ホーム</a></li>
+                    <li><a href="{{ route('shops.index') }}" class="hover:text-red-500">店舗一覧</a></li>
+                    @auth
+                        <li><a href="{{ route('dashboard') }}" class="hover:text-red-500">ダッシュボード</a></li>
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}" class="inline">
+                                @csrf
+                                <button type="submit" class="hover:text-red-500">ログアウト</button>
+                            </form>
+                        </li>
+                    @else
+                        <li><a href="{{ route('login') }}" class="hover:text-red-500">ログイン</a></li>
+                        <li><a href="{{ route('register') }}" class="hover:text-red-500">新規登録</a></li>
+                    @endauth
+                </ul>
+            </nav>
+        </div>
+    </header>
 
     {{-- メインコンテンツ --}}
     <main class="container mx-auto mt-8 p-4">
@@ -14,7 +35,6 @@
                 <h3 class="text-2xl font-semibold mt-8 mb-4 border-b-2 border-gray-300 pb-2 text-gray-700">{{ $categoryName }}</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($products as $product)
-                        {{-- 商品カードコンポーネントを使用（もし作成していれば） --}}
                         <div class="border rounded-lg p-4 flex flex-col items-center text-center bg-gray-50 hover:shadow-lg transition-shadow duration-300">
                             @if ($product->image_url)
                                 <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover rounded-md mb-4">

@@ -216,7 +216,7 @@ class ProductsTableSeeder extends Seeder
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Mini+Chashu+Don',
             ],
             [
-                'category_id' => $karaageId,
+                'category_id' => $ippinryoriId,
                 'name' => '鶏の唐揚げ（3個）',
                 'description' => '外はカリッと中はジューシー。',
                 'price' => 350,
@@ -272,7 +272,7 @@ class ProductsTableSeeder extends Seeder
                 'image_url' => null,
             ],
             [
-                'category_id' => $chashuId, // チャーシューカテゴリ
+                'category_id' => $gohanmonoId,
                 'name' => '炙りチャーシュー丼',
                 'description' => '香ばしく炙ったチャーシューが乗った丼。',
                 'price' => 500,
@@ -360,28 +360,28 @@ class ProductsTableSeeder extends Seeder
                 'image_url' => null,
             ],
             [
-                'category_id' => $ajitamagoId,
+                'category_id' => $toppingCategoryId,
                 'name' => '特製味玉',
                 'description' => 'とろーり半熟の味付け卵。',
                 'price' => 120,
                 'image_url' => null,
             ],
             [
-                'category_id' => $chashuId,
+                'category_id' => $toppingCategoryId,
                 'name' => '追加チャーシュー（3枚）',
                 'description' => 'とろとろの自家製チャーシュー。',
                 'price' => 250,
                 'image_url' => null,
             ],
             [
-                'category_id' => $negiId,
+                'category_id' => $toppingCategoryId,
                 'name' => '九条ネギ増し',
                 'description' => '香りの良い九条ネギをたっぷり。',
                 'price' => 100,
                 'image_url' => null,
             ],
             [
-                'category_id' => $menmaId,
+                'category_id' => $toppingCategoryId,
                 'name' => 'メンマ増し',
                 'description' => 'コリコリ食感のメンマを増量。',
                 'price' => 100,
