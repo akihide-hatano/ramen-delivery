@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Shop;
 use Illuminate\Support\Facades\Storage; // 画像アップロードのために追加
 
 class AdminProductController extends Controller
@@ -27,11 +28,13 @@ class AdminProductController extends Controller
     {
         // カテゴリを階層構造で取得し、フォームの選択肢として渡す
         $categories = Category::whereNull('parent_id')
-                              ->with('children.children') // 3階層まで取得
-                              ->orderBy('display_order')
-                              ->get();
+                            ->with('children.children') // 3階層まで取得
+                            ->orderBy('display_order')
+                            ->get();
+        // ★店舗データを取得し、ビューに渡す
+        $shops = Shop::orderBy('name')->get(); // 店舗名を昇順で取得
 
-        return view('admin.products.create', compact('categories'));
+        return view('admin.products.create', compact('categories'.'shops'));
     }
 
     /**
