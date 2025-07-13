@@ -45,12 +45,12 @@
                     </div>
                 </div>
 
-                <div class="mt-8 flex flex-col space-y-4">
-                    {{-- カートに追加ボタン（機能は未実装ですが、UIとして配置） --}}
-                    <form action="#" method="POST"> {{-- カート機能のルートを後で設定 --}}
+                <div class="flex flex-col space-y-4">
+                    {{-- カートに追加ボタン --}}
+                    <form action="#" method="POST">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
-                        <button type="submit" class="w-full bg-green-600 text-white text-xl font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg">
+                        <button type="submit" class="w-64 bg-green-600 text-white text-xl font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg">
                             カートに追加
                         </button>
                     </form>
