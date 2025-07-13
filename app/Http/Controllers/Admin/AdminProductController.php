@@ -114,10 +114,13 @@ class AdminProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::whereNull('parent_id')
-                              ->with('children.children')
-                              ->orderBy('display_order')
-                              ->get();
-        return view('admin.products.edit', compact('product', 'categories'));
+                        ->with('children.children')
+                        ->orderBy('display_order')
+                        ->get();
+        // ★Shopモデルも取得して渡す
+        $shops = Shop::orderBy('name')->get();
+
+        return view('admin.products.edit', compact('product', 'categories', 'shops')); // 'shops' を追加
     }
 
     public function update(Request $request, Product $product)
