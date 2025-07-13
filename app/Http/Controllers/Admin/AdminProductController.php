@@ -17,7 +17,14 @@ class AdminProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('category')->orderBy('name')->paginate(10);
+        // ★ここを修正しました：カテゴリの表示順でソートするように結合★
+        $products = Product::with('category')
+                            ->join('categories', 'products.category_id', '=', 'categories.id')
+                            ->orderBy('categories.display_order') // カテゴリの表示順でソート
+                            ->orderBy('products.id')           // 同じカテゴリ内では商品名でソート
+                            ->select('products.*')               // productsテーブルの全てのカラムを選択（joinしたcategoriesのカラムが混ざらないように）
+                            ->paginate(10);
+
         return view('admin.products.index', compact('products'));
     }
 
