@@ -15,7 +15,7 @@ class ProductsTableSeeder extends Seeder
     public function run(): void
     {
         // 開発時に全商品をクリアする場合 (必要に応じてコメントアウトを外す)
-        // DB::table('products')->truncate();
+        DB::table('products')->truncate(); // ★今回は必ず実行して新しいデータにするため、コメントアウトを外します★
 
         // 必要なカテゴリIDを取得（CategoriesTableSeederで作成されたカテゴリが存在することを確認してください）
         $shoyuRamenId = DB::table('categories')->where('name', '醤油ラーメン')->first()->id;
@@ -23,10 +23,11 @@ class ProductsTableSeeder extends Seeder
         $misoRamenId = DB::table('categories')->where('name', '味噌ラーメン')->first()->id;
         $shioRamenId = DB::table('categories')->where('name', '塩ラーメン')->first()->id;
 
-        $karaageId = DB::table('categories')->where('name', '唐揚げ')->first()->id;
-        $chahanId = DB::table('categories')->where('name', 'チャーハン')->first()->id;
+        $karaageId = DB::table('categories')->where('name', '唐揚げ')->first()->id; // 正しくは一品料理の子なので、CategoryTableSeederでの修正次第
+        $chahanId = DB::table('categories')->where('name', 'チャーハン')->first()->id; // 正しくはご飯物の子なので、CategoryTableSeederでの修正次第
         $gohanmonoId = DB::table('categories')->where('name', 'ご飯物')->first()->id;
         $ippinryoriId = DB::table('categories')->where('name', '一品料理')->first()->id;
+        $gyozaId = DB::table('categories')->where('name', '餃子')->first()->id; // 餃子カテゴリIDも取得
 
         // ドリンク関連のカテゴリを細かく取得
         $beerId = DB::table('categories')->where('name', 'ビール')->first()->id;
@@ -41,15 +42,11 @@ class ProductsTableSeeder extends Seeder
         $otherSoftDrinkId = DB::table('categories')->where('name', 'その他ソフトドリンク')->first()->id;
 
         // トッピング関連のカテゴリを取得
-        $toppingCategoryId = DB::table('categories')->where('name', 'トッピング')->first()->id; // 親カテゴリ
-        $chashuId = DB::table('categories')->where('name', 'チャーシュー')->first()->id;
-        $ajitamagoId = DB::table('categories')->where('name', '味玉')->first()->id;
-        $negiId = DB::table('categories')->where('name', 'ネギ')->first()->id;
-        $menmaId = DB::table('categories')->where('name', 'メンマ')->first()->id;
+        // トッピング自体を親カテゴリとしているので、これでOK
+        $toppingCategoryId = DB::table('categories')->where('name', 'トッピング')->first()->id;
 
 
         // --- アプリケーション全体でユニークな商品マスターデータを定義 ---
-        // ここには shop_id を含めない
         $productsData = [
             // ラーメン（塩ラーメン特化＆味変をマスターデータとして定義）
             [
@@ -195,156 +192,156 @@ class ProductsTableSeeder extends Seeder
 
             // サイドメニュー
             [
-                'category_id' => $chahanId,
+                'category_id' => $chahanId, // チャーハンカテゴリに紐付け
                 'name' => '半チャーハン',
                 'description' => 'ラーメンと相性抜群のミニチャーハン。',
                 'price' => 400,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Half+Chahan',
             ],
             [
-                'category_id' => $gohanmonoId,
+                'category_id' => $gohanmonoId, // ご飯物カテゴリに紐付け
                 'name' => 'ライス',
-                'description' => 'ご飯単品。大盛りもできます。',
+                'description' => '国産米を使用したふっくらご飯。',
                 'price' => 150,
                 'image_url' => null,
             ],
             [
-                'category_id' => $gohanmonoId,
+                'category_id' => $gohanmonoId, // ご飯物カテゴリに紐付け
                 'name' => 'ミニチャーシュー丼',
-                'description' => '特製チャーシューが乗ったご飯。',
+                'description' => '特製チャーシューが乗ったミニ丼。',
                 'price' => 380,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Mini+Chashu+Don',
             ],
             [
-                'category_id' => $ippinryoriId,
+                'category_id' => $karaageId, // 唐揚げカテゴリに紐付け
                 'name' => '鶏の唐揚げ（3個）',
                 'description' => '外はカリッと中はジューシー。',
                 'price' => 350,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Karaage',
             ],
             [
-                'category_id' => $ippinryoriId,
+                'category_id' => $gyozaId, // 餃子カテゴリに紐付け
                 'name' => '特製餃子（5個）',
                 'description' => '肉汁あふれる特製餃子。',
                 'price' => 450,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Gyoza',
             ],
             [
-                'category_id' => $ippinryoriId,
+                'category_id' => $ippinryoriId, // 一品料理カテゴリに紐付け
                 'name' => 'ピリ辛メンマ',
                 'description' => '箸休めに最適なピリ辛メンマ。',
                 'price' => 280,
                 'image_url' => null,
             ],
             [
-                'category_id' => $ippinryoriId,
+                'category_id' => $ippinryoriId, // 一品料理カテゴリに紐付け
                 'name' => 'たこ焼き（3個）',
                 'description' => '大阪名物たこ焼きをサイドメニューに。',
                 'price' => 300,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Takoyaki',
             ],
             [
-                'category_id' => $gohanmonoId,
+                'category_id' => $gohanmonoId, // ご飯物カテゴリに紐付け
                 'name' => '梅田限定！ミニカレー丼',
                 'description' => 'スパイシーなミニカレー丼。',
                 'price' => 450,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Mini+Curry+Don',
             ],
             [
-                'category_id' => $ippinryoriId,
+                'category_id' => $ippinryoriId, // 一品料理カテゴリに紐付け
                 'name' => '京風だし巻き卵',
                 'description' => 'ふわふわの京風だし巻き卵。',
                 'price' => 500,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Dashimaki+Tamago',
             ],
             [
-                'category_id' => $ippinryoriId,
+                'category_id' => $ippinryoriId, // 一品料理カテゴリに紐付け
                 'name' => '大宮名物！鶏皮ポン酢',
                 'description' => 'お酒が進む鶏皮ポン酢。',
                 'price' => 380,
                 'image_url' => null,
             ],
             [
-                'category_id' => $gohanmonoId,
+                'category_id' => $gohanmonoId, // ご飯物カテゴリに紐付け
                 'name' => '京都駅限定！九条ネギご飯',
                 'description' => '九条ネギをたっぷり乗せたご飯。',
                 'price' => 300,
                 'image_url' => null,
             ],
             [
-                'category_id' => $gohanmonoId,
+                'category_id' => $gohanmonoId, // ご飯物カテゴリに紐付け
                 'name' => '炙りチャーシュー丼',
-                'description' => '香ばしく炙ったチャーシューが乗った丼。',
+                'description' => '香ばしく炙ったチャーシュー丼。',
                 'price' => 500,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Aburi+Chashu+Don',
             ],
 
             // ドリンク
             [
-                'category_id' => $beerId,
+                'category_id' => $beerId, // ビールカテゴリに紐付け
                 'name' => '生ビール（中ジョッキ）',
                 'description' => '冷たい生ビール。',
                 'price' => 500,
                 'image_url' => null,
             ],
             [
-                'category_id' => $ochaId,
+                'category_id' => $ochaId, // お茶カテゴリに紐付け
                 'name' => '烏龍茶',
                 'description' => 'さっぱりとしたウーロン茶。',
                 'price' => 200,
                 'image_url' => null,
             ],
             [
-                'category_id' => $tansanInryoId,
+                'category_id' => $tansanInryoId, // 炭酸飲料カテゴリに紐付け
                 'name' => 'コカ・コーラ',
                 'description' => '定番のコーラ。',
                 'price' => 220,
                 'image_url' => null,
             ],
             [
-                'category_id' => $juiceId,
+                'category_id' => $juiceId, // ジュースカテゴリに紐付け
                 'name' => 'オレンジジュース',
                 'description' => '100%オレンジジュース。',
                 'price' => 220,
                 'image_url' => null,
             ],
             [
-                'category_id' => $nihonshuId,
+                'category_id' => $nihonshuId, // ★日本酒カテゴリに紐付けを修正★
                 'name' => '地酒（冷）',
                 'description' => '季節限定の地酒。',
                 'price' => 600,
                 'image_url' => null,
             ],
             [
-                'category_id' => $sourChuhaiId,
+                'category_id' => $sourChuhaiId, // ★サワー・酎ハイカテゴリに紐付けを修正★
                 'name' => 'レモンサワー',
                 'description' => '爽やかなレモンサワー。',
                 'price' => 400,
                 'image_url' => null,
             ],
             [
-                'category_id' => $ochaId,
+                'category_id' => $ochaId, // お茶カテゴリに紐付け
                 'name' => '緑茶',
                 'description' => '食事に合う緑茶。',
                 'price' => 200,
                 'image_url' => null,
             ],
             [
-                'category_id' => $ochaId,
+                'category_id' => $ochaId, // お茶カテゴリに紐付け
                 'name' => '特選ほうじ茶',
                 'description' => '食後にぴったりの香ばしいほうじ茶。',
                 'price' => 250,
                 'image_url' => null,
             ],
             [
-                'category_id' => $tansanInryoId,
+                'category_id' => $tansanInryoId, // 炭酸飲料カテゴリに紐付け
                 'name' => 'クラフトコーラ',
                 'description' => 'こだわりのスパイスを使ったクラフトコーラ。',
                 'price' => 350,
                 'image_url' => null,
             ],
             [
-                'category_id' => $otherSoftDrinkId,
+                'category_id' => $otherSoftDrinkId, // その他のソフトドリンクカテゴリに紐付け
                 'name' => '自家製ジンジャーエール',
                 'description' => '生姜が効いた自家製ジンジャーエール。',
                 'price' => 380,
@@ -392,9 +389,11 @@ class ProductsTableSeeder extends Seeder
         foreach ($productsData as $productData) {
             // 同じ名前の商品がなければ挿入 (重複挿入防止)
             // Productモデルのcreateメソッドを使用し、shop_idを含まない
-            if (!Product::where('name', $productData['name'])->exists()) {
-                Product::create($productData);
-            }
+            // updateOrInsert を使うと、既存データがあれば更新されるので、シーダーの再実行時に便利です。
+            Product::updateOrInsert(
+                ['name' => $productData['name']], // name でレコードを特定
+                array_merge($productData, ['created_at' => now(), 'updated_at' => now()]) // 存在しない場合はinsert、存在する場合はupdate
+            );
         }
     }
 }

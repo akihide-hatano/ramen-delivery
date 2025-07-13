@@ -46,40 +46,94 @@ class ProductController extends Controller
      */
     public function globalIndex() // このメソッドを編集
     {
-        // ★ここを修正しました★
-        // カテゴリを display_order 順に取得し、その順序で商品をグループ化
-        // まず、親カテゴリ（parent_idがnull）を display_order 順に取得
+// display_order順に最上位カテゴリ（親カテゴリ）を取得
         $mainCategories = Category::whereNull('parent_id')
                                     ->orderBy('display_order')
                                     ->get();
 
-        $groupedProducts = collect(); // 空のコレクションで初期化
+        $nestedGroupedProducts = collect(); // 最終的にビューに渡す多段階グループ化されたデータ
 
         foreach ($mainCategories as $mainCategory) {
-            // そのメインカテゴリに直接紐付く商品を取得
-            $directProducts = Product::where('category_id', $mainCategory->id)->get();
+            $mainCategoryProducts = collect(); // そのメインカテゴリ全体の商品（直下のもの）
 
-            // そのメインカテゴリの子孫カテゴリのIDを全て取得
-            $allChildCategoryIds = $this->getAllChildCategoryIds($mainCategory->id);
+            // そのメインカテゴリの子カテゴリを display_order 順に取得
+            // with('products') で子カテゴリに紐付く商品もまとめてロード
+            $subCategories = Category::where('parent_id', $mainCategory->id)
+                                    ->orderBy('display_order')
+                                    ->with(['products' => function($query) {
+                                        $query->orderBy('name'); // 商品を名前順にソート
+                                    }])
+                                    ->get();
 
-            // 子孫カテゴリに紐付く商品を取得
-            $childProducts = collect();
-            if ($allChildCategoryIds->isNotEmpty()) {
-                $childProducts = Product::whereIn('category_id', $allChildCategoryIds)->get();
-            }
+            // 子カテゴリがある場合
+            if ($subCategories->isNotEmpty()) {
+                $subCategoryGroups = collect();
+                foreach ($subCategories as $subCategory) {
+                    // さらに下位のカテゴリ（例: ビール、日本酒など）を取得
+                    $nestedSubCategories = Category::where('parent_id', $subCategory->id)
+                                                    ->orderBy('display_order')
+                                                    ->with(['products' => function($query) {
+                                                        $query->orderBy('name');
+                                                    }])
+                                                    ->get();
 
-            // 直接の商品と子孫カテゴリの商品を結合
-            $combinedProducts = $directProducts->concat($childProducts);
-
-            // 商品があれば、メインカテゴリ名でグループに追加
-            if ($combinedProducts->isNotEmpty()) {
-                // 必要であれば、ここで結合した商品をさらにソート（例：商品名順）
-                $groupedProducts->put($mainCategory->name, $combinedProducts->sortBy('name'));
+                    if ($nestedSubCategories->isNotEmpty()) {
+                        // さらに深い階層のカテゴリがあれば、そのカテゴリ名でグループ化
+                        $deepNestedGroups = collect();
+                        foreach ($nestedSubCategories as $deepSubCategory) {
+                            if ($deepSubCategory->products->isNotEmpty()) {
+                                $deepNestedGroups->put($deepSubCategory->name, $deepSubCategory->products);
+                            }
+                        }
+                        // 中間カテゴリ名の下に、さらに深いカテゴリのグループを追加
+                        if ($deepNestedGroups->isNotEmpty()) {
+                             $subCategoryGroups->put($subCategory->name, $deepNestedGroups);
+                        }
+                    } else {
+                        // 最下層のカテゴリ（商品が直接紐付いているカテゴリ）の場合
+                        if ($subCategory->products->isNotEmpty()) {
+                            $subCategoryGroups->put($subCategory->name, $subCategory->products);
+                        }
+                    }
+                }
+                if ($subCategoryGroups->isNotEmpty()) {
+                    $nestedGroupedProducts->put($mainCategory->name, $subCategoryGroups);
+                }
+            } else {
+                // 最上位カテゴリに直接商品が紐付いている場合（例: 塩ラーメンがラーメンカテゴリに直接紐付いている場合）
+                $directProducts = Product::where('category_id', $mainCategory->id)
+                                        ->orderBy('name')
+                                        ->get();
+                if ($directProducts->isNotEmpty()) {
+                    $nestedGroupedProducts->put($mainCategory->name, $directProducts);
+                }
             }
         }
 
-        // ビューに商品データを渡して表示
-        return view('products.global_index', compact('groupedProducts'));
+        // ここで $nestedGroupedProducts の構造は以下のようになります（例）：
+        // [
+        //   'ラーメン' => Collection (商品リスト),
+        //   'サイドメニュー' => Collection (商品リスト),
+        //   'ドリンク' => [ // コレクションの中にさらにコレクション
+        //     'アルコール' => [
+        //       'ビール' => Collection (生ビール),
+        //       '日本酒' => Collection (地酒),
+        //       'サワー・酎ハイ' => Collection (レモンサワー),
+        //       // ...
+        //     ],
+        //     'ソフトドリンク' => [
+        //       'お茶' => Collection (烏龍茶, 緑茶),
+        //       '炭酸飲料' => Collection (コカ・コーラ, クラフトコーラ),
+        //       'ジュース' => Collection (オレンジジュース),
+        //       'その他ソフトドリンク' => Collection (自家製ジンジャーエール)
+        //     ]
+        //   ],
+        //   'トッピング' => Collection (商品リスト),
+        // ]
+        // または、直接商品が紐付く場合は
+        // 'ラーメン' => Collection (潮屋塩ラーメン, 味玉潮屋塩ラーメン, ...)
+
+        return view('products.global_index', compact('nestedGroupedProducts'));
     }
 
     /**
