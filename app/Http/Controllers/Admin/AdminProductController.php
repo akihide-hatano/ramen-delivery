@@ -34,7 +34,7 @@ class AdminProductController extends Controller
         // ★店舗データを取得し、ビューに渡す
         $shops = Shop::orderBy('name')->get(); // 店舗名を昇順で取得
 
-        return view('admin.products.create', compact('categories'.'shops'));
+        return view('admin.products.create', compact('categories','shops'));
     }
 
     /**

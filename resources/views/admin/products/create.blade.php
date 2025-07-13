@@ -87,8 +87,15 @@
                         {{-- 限定場所 (is_limitedがチェックされたら表示/非表示を切り替えるJavaScriptが必要) --}}
                         <div class="mb-4" id="limited_location_field" style="{{ old('is_limited') ? '' : 'display:none;' }}">
                             <label for="limited_location" class="block text-sm font-medium text-gray-700">限定場所</label>
-                            <input type="text" name="limited_location" id="limited_location" value="{{ old('limited_location') }}"
+                            <select name="limited_location" id="limited_location"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <option value="">選択してください</option>
+                                @foreach ($shops as $shop)
+                                    <option value="{{ $shop->name }}" {{ old('limited_location') == $shop->name ? 'selected' : '' }}>
+                                        {{ $shop->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
                         {{-- 限定タイプ (is_limitedがチェックされたら表示/非表示を切り替えるJavaScriptが必要) --}}
