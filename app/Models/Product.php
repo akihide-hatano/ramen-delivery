@@ -16,6 +16,7 @@ class Product extends Model
         'price',
         'image_url',
         'is_limited',
+        'limited_location',
     ];
     /**
      * Product は複数の Shop に属する (多対多)

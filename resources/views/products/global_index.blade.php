@@ -1,7 +1,4 @@
 <x-app-layout>
-    {{-- x-app-layout がヘッダーを提供するため、ここでは重複するヘッダーを削除します --}}
-    {{-- <header class="bg-gray-800 text-white p-4 shadow-md">...</header> --}}
-
     {{-- メインコンテンツ --}}
     <main class="container mx-auto mt-8 p-4">
         <h2 class="text-4xl font-bold text-center text-gray-800 mb-8">全商品一覧</h2>
@@ -23,11 +20,18 @@
                         <h4 class="text-3xl font-bold mt-10 mb-4 border-b-4 border-red-500 pb-2 text-gray-800">{{ $mainCategoryName }}</h4>
 
                         @if ($subGroupsOrProducts instanceof \Illuminate\Support\Collection && $subGroupsOrProducts->first() instanceof \App\Models\Product)
-                            {{-- 最上位カテゴリの直下に商品がある場合（例：ラーメン、トッピング） --}}
+                            {{-- 最上位カテゴリの直下に商品がある場合 --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 @foreach ($subGroupsOrProducts as $product)
                                     <div class="border rounded-lg p-4 flex flex-col items-center text-center bg-gray-50 hover:shadow-lg transition-shadow duration-300 relative">
-                                        {{-- 限定バッジはトップレベルで分けているのでここでは不要 --}}
+                                        {{-- ★ここから追加：限定場所バッジ★ --}}
+                                        @if ($product->is_limited && $product->limited_location)
+                                            <span class="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md z-10">
+                                                {{ $product->limited_location }}限定
+                                            </span>
+                                        @endif
+                                        {{-- ★ここまで追加：限定場所バッジ★ --}}
+
                                         @if ($product->image_url)
                                             <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover rounded-md mb-4">
                                         @else
@@ -45,7 +49,7 @@
                                 @endforeach
                             </div>
                         @else
-                            {{-- さらに子カテゴリを持つ最上位カテゴリ（例：ドリンク、サイドメニュー） --}}
+                            {{-- さらに子カテゴリを持つカテゴリ --}}
                             @foreach ($subGroupsOrProducts as $subCategoryName => $nestedGroupsOrProducts)
                                 {{-- 中間カテゴリの見出し --}}
                                 <h5 class="text-2xl font-semibold mt-6 mb-3 border-b-2 border-gray-400 pb-1 text-gray-700 ml-4">{{ $subCategoryName }}</h5>
@@ -55,6 +59,14 @@
                                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ml-8">
                                         @foreach ($nestedGroupsOrProducts as $product)
                                             <div class="border rounded-lg p-4 flex flex-col items-center text-center bg-gray-50 hover:shadow-lg transition-shadow duration-300 relative">
+                                                {{-- ★ここから追加：限定場所バッジ★ --}}
+                                                @if ($product->is_limited && $product->limited_location)
+                                                    <span class="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md z-10">
+                                                        {{ $product->limited_location }}限定
+                                                    </span>
+                                                @endif
+                                                {{-- ★ここまで追加：限定場所バッジ★ --}}
+
                                                 @if ($product->image_url)
                                                     <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover rounded-md mb-4">
                                                 @else
@@ -79,6 +91,14 @@
                                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ml-12">
                                             @foreach ($products as $product)
                                                 <div class="border rounded-lg p-4 flex flex-col items-center text-center bg-gray-50 hover:shadow-lg transition-shadow duration-300 relative">
+                                                    {{-- ★ここから追加：限定場所バッジ★ --}}
+                                                    @if ($product->is_limited && $product->limited_location)
+                                                        <span class="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md z-10">
+                                                            {{ $product->limited_location }}限定
+                                                        </span>
+                                                    @endif
+                                                    {{-- ★ここまで追加：限定場所バッジ★ --}}
+
                                                     @if ($product->image_url)
                                                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover rounded-md mb-4">
                                                     @else

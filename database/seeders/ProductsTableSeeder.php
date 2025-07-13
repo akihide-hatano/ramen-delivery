@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\Product; // Productモデルをuseする
+use App\Models\Product;
 
 class ProductsTableSeeder extends Seeder
 {
@@ -14,10 +14,10 @@ class ProductsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        // 開発時に全商品をクリアする場合 (必ず実行して新しいデータにするため、コメントアウトを外します)
+        // 開発時に全商品をクリア
         DB::table('products')->truncate();
 
-        // 必要なカテゴリIDを取得（CategoriesTableSeederで作成されたカテゴリが存在することを確認してください）
+        // 必要なカテゴリIDを取得
         $shoyuRamenId = DB::table('categories')->where('name', '醤油ラーメン')->first()->id;
         $tonkotsuRamenId = DB::table('categories')->where('name', '豚骨ラーメン')->first()->id;
         $misoRamenId = DB::table('categories')->where('name', '味噌ラーメン')->first()->id;
@@ -52,7 +52,8 @@ class ProductsTableSeeder extends Seeder
                 'description' => '魚介系のあっさりとした特製塩スープが自慢の基本メニュー。',
                 'price' => 880,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shioya+Base+Ramen',
-                'is_limited' => false, // ★共通商品なので false★
+                'is_limited' => false,
+                'limited_location' => null, // ★共通商品なので null★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -60,16 +61,18 @@ class ProductsTableSeeder extends Seeder
                 'description' => '潮屋塩ラーメンに特製味玉をトッピング。',
                 'price' => 980,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Ajitama+Shio+Ramen',
-                'is_limited' => false, // ★共通商品なので false★
+                'is_limited' => false,
+                'limited_location' => null, // ★共通商品なので null★
             ],
-            // ★限定商品に is_limited => true を設定★
+            // ★限定商品に is_limited => true と limited_location を設定、商品名から限定文言を削除★
             [
                 'category_id' => $shioRamenId,
-                'name' => '難波限定！焦がし醤油塩ラーメン',
+                'name' => '焦がし醤油塩ラーメン', // ★商品名変更★
                 'description' => '焦がし醤油の香ばしさが際立つ、難波店限定の塩ラーメン。',
                 'price' => 950,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Namba+Kogashi+Shio',
-                'is_limited' => true, // ★限定商品なので true★
+                'is_limited' => true,
+                'limited_location' => '難波', // ★追加★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -77,16 +80,18 @@ class ProductsTableSeeder extends Seeder
                 'description' => '北海道産バターと甘いコーンでまろやかに仕上げた塩ラーメン。',
                 'price' => 1000,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Butter+Corn+Shio',
-                'is_limited' => true, // ★限定商品なので true★
+                'is_limited' => true,
+                'limited_location' => '芝田', // ★店舗限定ではないが、一応限定品とする場合★
             ],
-            // ... 他の限定ラーメンも同様に is_limited => true を設定 ...
+            // ... 他の限定ラーメンも同様に is_limited => true と limited_location を設定 ...
             [
                 'category_id' => $shioRamenId,
-                'name' => '梅田特製！梅しそ塩ラーメン',
+                'name' => '梅しそ塩ラーメン', // ★商品名変更★
                 'description' => '紀州梅と大葉でさっぱりと仕上げた、梅田店限定の塩ラーメン。',
                 'price' => 960,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Umeda+Ume+Shiso+Shio',
                 'is_limited' => true,
+                'limited_location' => '梅田', // ★追加★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -95,14 +100,16 @@ class ProductsTableSeeder extends Seeder
                 'price' => 990,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Seabura+Shio',
                 'is_limited' => true,
+                'limited_location' => '梅田',
             ],
             [
                 'category_id' => $shioRamenId,
-                'name' => '芝田限定！レモン塩ラーメン',
+                'name' => 'レモン塩ラーメン', // ★商品名変更★
                 'description' => 'フレッシュレモンを絞っていただく、爽やかな塩ラーメン。',
                 'price' => 950,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shibata+Lemon+Shio',
                 'is_limited' => true,
+                'limited_location' => '芝田', // ★追加★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -111,14 +118,16 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1020,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Tantan+Shio',
                 'is_limited' => true,
+                'limited_location' => '烏丸七条',
             ],
             [
                 'category_id' => $shioRamenId,
-                'name' => '河原町三条限定！柚子塩ラーメン',
+                'name' => '柚子塩ラーメン', // ★商品名変更★
                 'description' => '柚子の香りが広がる、京都らしい上品な塩ラーメン。',
                 'price' => 970,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=KawaSanjo+Yuzu+Shio',
                 'is_limited' => true,
+                'limited_location' => '河原町三条', // ★追加★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -127,14 +136,16 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1050,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Toripaitan+Shio',
                 'is_limited' => true,
+                'limited_location' => '河原町三条',
             ],
             [
                 'category_id' => $shioRamenId,
-                'name' => '四条限定！焦がしネギ塩ラーメン',
+                'name' => '焦がしネギ塩ラーメン', // ★商品名変更★
                 'description' => '香ばしい焦がしネギの風味が食欲をそそる塩ラーメン。',
                 'price' => 980,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shijo+Kogashi+Negi+Shio',
                 'is_limited' => true,
+                'limited_location' => '河原町', // ★追加★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -143,14 +154,16 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1000,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Kujo+Negi+Shio',
                 'is_limited' => true,
+                'limited_location' => '京都駅',
             ],
             [
                 'category_id' => $shioRamenId,
-                'name' => '大宮限定！焦がしにんにく塩ラーメン',
+                'name' => '焦がしにんにく塩ラーメン', // ★商品名変更★
                 'description' => 'ガツンと効いた焦がしにんにくが特徴の塩ラーメン。',
                 'price' => 990,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Omiya+Garlic+Shio',
                 'is_limited' => true,
+                'limited_location' => '大宮', // ★追加★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -159,14 +172,16 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1030,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Omiya+Miso+Shio',
                 'is_limited' => true,
+                'limited_location' => '大宮',
             ],
             [
                 'category_id' => $shioRamenId,
-                'name' => '京都駅限定！京鴨塩ラーメン',
+                'name' => '京鴨塩ラーメン', // ★商品名変更★
                 'description' => '京鴨の出汁が効いた、京都駅店限定の贅沢な塩ラーメン。',
                 'price' => 1100,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Kyoto+Duck+Shio',
                 'is_limited' => true,
+                'limited_location' => '京都駅', // ★追加★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -175,14 +190,16 @@ class ProductsTableSeeder extends Seeder
                 'price' => 960,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Tororo+Kombu+Shio',
                 'is_limited' => true,
+                'limited_location' => '京都駅',
             ],
             [
                 'category_id' => $shioRamenId,
-                'name' => '烏丸限定！海老塩ラーメン',
+                'name' => '海老塩ラーメン', // ★商品名変更★
                 'description' => '海老の旨味が凝縮された、香ばしい塩ラーメン。',
                 'price' => 1020,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Karasuma+Shrimp+Shio',
                 'is_limited' => true,
+                'limited_location' => '烏丸七条', // ★追加★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -191,14 +208,16 @@ class ProductsTableSeeder extends Seeder
                 'price' => 980,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shio+Tonkotsu',
                 'is_limited' => true,
+                'limited_location' => '大阪難波',
             ],
             [
                 'category_id' => $shioRamenId,
-                'name' => '七条限定！アサリ塩ラーメン',
+                'name' => 'アサリ塩ラーメン', // ★商品名変更★
                 'description' => 'アサリの出汁が効いた、魚介の旨味あふれる塩ラーメン。',
                 'price' => 1000,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shichijo+Clam+Shio',
                 'is_limited' => true,
+                'limited_location' => '烏丸七条', // ★追加★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -207,6 +226,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 990,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Spicy+Miso+Shio',
                 'is_limited' => true,
+                'limited_location' => '梅田',
             ],
 
             // サイドメニュー（共通商品）
@@ -217,6 +237,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 400,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Half+Chahan',
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $gohanmonoId,
@@ -225,6 +246,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 150,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $gohanmonoId,
@@ -233,6 +255,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 380,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Mini+Chashu+Don',
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $karaageId,
@@ -241,6 +264,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 350,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Karaage',
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $gyozaId,
@@ -249,6 +273,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 450,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Gyoza',
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $ippinryoriId,
@@ -257,8 +282,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 280,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
-            // ★限定サイドメニュー・ドリンクにも is_limited => true を設定★
+            // ★限定サイドメニュー・ドリンクにも is_limited => true と limited_location を設定、商品名から限定文言を削除★
             [
                 'category_id' => $ippinryoriId,
                 'name' => 'たこ焼き（3個）',
@@ -266,14 +292,16 @@ class ProductsTableSeeder extends Seeder
                 'price' => 300,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Takoyaki',
                 'is_limited' => true,
+                'limited_location' => '大阪難波', // ★追加★
             ],
             [
                 'category_id' => $gohanmonoId,
-                'name' => '梅田限定！ミニカレー丼',
+                'name' => 'ミニカレー丼', // ★商品名変更★
                 'description' => 'スパイシーなミニカレー丼。',
                 'price' => 450,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Mini+Curry+Don',
                 'is_limited' => true,
+                'limited_location' => '梅田', // ★追加★
             ],
             [
                 'category_id' => $ippinryoriId,
@@ -282,22 +310,25 @@ class ProductsTableSeeder extends Seeder
                 'price' => 500,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Dashimaki+Tamago',
                 'is_limited' => true,
+                'limited_location' => '河原町三条', // ★追加★
             ],
             [
                 'category_id' => $ippinryoriId,
-                'name' => '大宮名物！鶏皮ポン酢',
+                'name' => '鶏皮ポン酢', // ★商品名変更★
                 'description' => 'お酒が進む鶏皮ポン酢。',
                 'price' => 380,
                 'image_url' => null,
                 'is_limited' => true,
+                'limited_location' => '大宮', // ★追加★
             ],
             [
                 'category_id' => $gohanmonoId,
-                'name' => '京都駅限定！九条ネギご飯',
+                'name' => '九条ネギご飯', // ★商品名変更★
                 'description' => '九条ネギをたっぷり乗せたご飯。',
                 'price' => 300,
                 'image_url' => null,
                 'is_limited' => true,
+                'limited_location' => '京都駅', // ★追加★
             ],
             [
                 'category_id' => $gohanmonoId,
@@ -306,6 +337,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 500,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Aburi+Chashu+Don',
                 'is_limited' => true,
+                'limited_location' => '烏丸七条', // ★追加★
             ],
             // ドリンク（共通商品）
             [
@@ -315,6 +347,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 500,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $ochaId,
@@ -323,6 +356,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 200,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $tansanInryoId,
@@ -331,6 +365,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 220,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $juiceId,
@@ -339,22 +374,25 @@ class ProductsTableSeeder extends Seeder
                 'price' => 220,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
-                'category_id' => $nihonshuId, // 日本酒カテゴリに紐付け
+                'category_id' => $nihonshuId,
                 'name' => '地酒（冷）',
                 'description' => '季節限定の地酒。',
                 'price' => 600,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
-                'category_id' => $sourChuhaiId, // サワー・酎ハイカテゴリに紐付け
+                'category_id' => $sourChuhaiId,
                 'name' => 'レモンサワー',
                 'description' => '爽やかなレモンサワー。',
                 'price' => 400,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $ochaId,
@@ -363,8 +401,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 200,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
-            // ★限定ドリンクにも is_limited => true を設定★
+            // ★限定ドリンクにも is_limited => true と limited_location を設定、商品名から限定文言を削除★
             [
                 'category_id' => $ochaId,
                 'name' => '特選ほうじ茶',
@@ -372,6 +411,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 250,
                 'image_url' => null,
                 'is_limited' => true,
+                'limited_location' => '芝田', // ★追加★
             ],
             [
                 'category_id' => $tansanInryoId,
@@ -380,6 +420,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 350,
                 'image_url' => null,
                 'is_limited' => true,
+                'limited_location' => '河原町四条', // ★追加★
             ],
             [
                 'category_id' => $otherSoftDrinkId,
@@ -388,6 +429,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 380,
                 'image_url' => null,
                 'is_limited' => true,
+                'limited_location' => '烏丸七条', // ★追加★
             ],
 
             // トッピング（共通商品）
@@ -398,6 +440,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 150,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $toppingCategoryId,
@@ -406,6 +449,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 120,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $toppingCategoryId,
@@ -414,6 +458,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 250,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $toppingCategoryId,
@@ -422,6 +467,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 100,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
             [
                 'category_id' => $toppingCategoryId,
@@ -430,6 +476,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 100,
                 'image_url' => null,
                 'is_limited' => false,
+                'limited_location' => null,
             ],
         ];
 
