@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id(); // カテゴリID (BIGINT, PK, AUTO_INCREMENT)
             $table->string('name', 100)->unique(); // カテゴリ名 (ユニーク制約を追加)
+            $table->integer('display_order');
             $table->text('description')->nullable(); // カテゴリの説明
 
             // 親カテゴリID (自己参照リレーションのため)
