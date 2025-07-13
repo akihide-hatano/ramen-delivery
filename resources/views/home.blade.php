@@ -1,9 +1,5 @@
 <x-app-layout>
-    {{-- <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            ホーム
-        </h2>
-    </x-slot> --}}
+    {{-- x-app-layout の中でヘッダーが定義されているため、ここでは不要です --}}
     <header class="bg-gray-800 text-white p-4 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold text-red-500">ラーメン潮屋</h1>
@@ -102,8 +98,6 @@
                                     {{-- Google Maps Embed API を使用して地図を埋め込む --}}
                                     @if ($shop->lat && $shop->lon)
                                         @php
-                                            // 緯度経度がある場合、それを使って地図URLを生成
-                                            // ★★★ここを修正★★★：Google Maps Embed APIの正しいURL形式に！
                                             $apiKey = env('Maps_API_KEY');
                                             $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$shop->lat},{$shop->lon}";
                                         @endphp
@@ -118,8 +112,6 @@
                                         ></iframe>
                                     @elseif ($shop->address)
                                         @php
-                                            // 緯度経度がない場合、住所で検索して地図URLを生成
-                                            // ★★★ここを修正★★★：Google Maps Embed APIの正しいURL形式に！
                                             $apiKey = env('Maps_API_KEY');
                                             $encodedAddress = urlencode($shop->address);
                                             $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$encodedAddress}";
@@ -162,15 +154,19 @@
                 <h3 class="text-3xl font-bold text-center text-gray-800 mb-8">おすすめメニュー</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     @php
-                        // シーダーで投入した潮屋の共通商品からいくつかピックアップ
-                        $shioyaShopIds = \App\Models\Shop::where('name', 'like', 'ラーメン潮屋%')->pluck('id');
-                        $featuredProducts = \App\Models\Product::whereIn('shop_id', $shioyaShopIds)
-                                            ->inRandomOrder()
-                                            ->limit(10) // 6個表示
-                                            ->get();
+                        // 全てのラーメンカテゴリからランダムに6つピックアップする例
+                        $ramenCategoryId = \App\Models\Category::where('name', 'ラーメン')->first()?->id;
+                        $featuredProducts = collect(); // 空のコレクションで初期化
+
+                        if ($ramenCategoryId) {
+                            $featuredProducts = \App\Models\Product::where('category_id', $ramenCategoryId)
+                                                                    ->inRandomOrder()
+                                                                    ->limit(6)
+                                                                    ->get();
+                        }
                     @endphp
 
-                    @foreach ($featuredProducts as $product)
+                    @forelse ($featuredProducts as $product)
                         <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
                             @if ($product->image_url)
                                 <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-32 object-cover">
@@ -183,7 +179,9 @@
                                 <a href="{{ route('products.show', $product) }}" class="block text-center bg-green-500 text-white text-sm px-3 py-1 rounded-md mt-2 hover:bg-green-600 transition duration-300">詳細</a>
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <p class="col-span-full text-center text-gray-600">おすすめ商品がありません。</p>
+                    @endforelse
                 </div>
             </div>
         </section>
@@ -191,7 +189,7 @@
 
     <footer class="bg-gray-800 text-white p-6 text-center mt-12">
         <p>© {{ date('Y') }} ラーメン潮屋. All rights reserved.</p>
-    </footer>
+    </footer> 
 
 {{-- home.blade.php の JavaScript コード --}}
 @push('scripts')
