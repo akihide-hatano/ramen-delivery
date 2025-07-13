@@ -1,0 +1,13 @@
+[90m= [39m[34;4mApp\Models\Product[39;24m {#6237
+    [34mid[39m: [35m33[39m,
+    [34mname[39m: "[32m生ビール（中ジョッキ）[39m",
+    [34mdescription[39m: "[32m冷たい生ビール。[39m",
+    [34mprice[39m: [35m500[39m,
+    [34mimage_url[39m: [36mnull[39m,
+    [34mcategory_id[39m: [35m21[39m,
+    [34mcreated_at[39m: "[32m2025-07-13 09:48:06[39m",
+    [34mupdated_at[39m: "[32m2025-07-13 09:48:06[39m",
+    [34mis_limited[39m: [36mfalse[39m,
+    [34mlimited_location[39m: [36mnull[39m,
+  }
+

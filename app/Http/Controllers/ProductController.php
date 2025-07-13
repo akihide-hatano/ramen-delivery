@@ -3,33 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Product; // Productモデルをインポート
-use App\Models\Category; // Categoryモデルをインポート
-use App\Models\Shop; // Shopモデルをインポート
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\Shop;
 
 class ProductController extends Controller
 {
-    /**
-     * 指定された店舗の商品一覧を表示
-     * ルート: /shops/{shop}/products (name: shops.products.index)
-     *
-     * @param  \App\Models\Shop  $shop // Implicit Model Binding
-     * @return \Illuminate\View\View
-     */
-    public function index(Shop $shop)
-    {
-        $products = $shop->products() // Shopモデルのproducts()リレーションを使用
-                            ->with('category')
-                            ->orderBy('category_id') // カテゴリIDでソート
-                            ->orderBy('name') // 商品名でソート
-                            ->get();
-
-        $groupedProducts = $products->groupBy(function($product) {
-            return $product->category ? $product->category->name : 'その他'; // カテゴリ名でグループ化
-        });
-
-        return view('products.index', compact('shop', 'groupedProducts'));
-    }
+    // ... (index メソッドは変更なし) ...
 
     /**
      * 全体の商品一覧を表示 (共通商品と限定商品を分けて階層構造でグループ化)
@@ -40,10 +20,10 @@ class ProductController extends Controller
     public function globalIndex()
     {
         // 1. 全ての商品を取得（カテゴリ情報も一緒にロード）
-        $allProducts = Product::with('category')->get();
+        // ここも with(['category.parent']) に変更
+        $allProducts = Product::with(['category.parent'])->get();
 
         // 2. 商品を「限定」と「共通」に分ける
-        // ★ここを修正しました：is_limited カラムを使用★
         $limitedProducts = $allProducts->filter(function ($product) {
             return $product->is_limited;
         });
@@ -57,7 +37,7 @@ class ProductController extends Controller
                                     ->orderBy('display_order')
                                     ->get();
 
-        $finalGroupedProducts = collect(); // 最終的にビューに渡すデータ
+        $finalGroupedProducts = collect();
 
         // 「共通商品」のグループ化
         $finalGroupedProducts->put('共通商品', $this->groupProductsByHierarchy($commonProducts, $mainCategories));
@@ -77,6 +57,8 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
+        // ★ここを修正しました：category.parent を eager load する★
+        $product->load('category.parent');
         return view('products.show', compact('product'));
     }
 
@@ -92,15 +74,19 @@ class ProductController extends Controller
         $grouped = collect();
 
         foreach ($mainCategories as $mainCategory) {
+            // ここも with(['products', 'parent']) に変更
             $subCategories = Category::where('parent_id', $mainCategory->id)
                                     ->orderBy('display_order')
+                                    ->with(['products', 'parent']) // ★親カテゴリもロード★
                                     ->get();
 
             if ($subCategories->isNotEmpty()) {
                 $subCategoryGroups = collect();
                 foreach ($subCategories as $subCategory) {
+                    // ここも with(['products', 'parent']) に変更
                     $nestedSubCategories = Category::where('parent_id', $subCategory->id)
                                                     ->orderBy('display_order')
+                                                    ->with(['products', 'parent']) // ★親カテゴリもロード★
                                                     ->get();
 
                     if ($nestedSubCategories->isNotEmpty()) {
@@ -112,7 +98,7 @@ class ProductController extends Controller
                             }
                         }
                         if ($deepNestedGroups->isNotEmpty()) {
-                            $subCategoryGroups->put($subCategory->name, $deepNestedGroups);
+                             $subCategoryGroups->put($subCategory->name, $deepNestedGroups);
                         }
                     } else {
                         $productsInSubCategory = $productsToGroup->where('category_id', $subCategory->id)->sortBy('name');

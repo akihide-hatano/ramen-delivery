@@ -1,6 +1,6 @@
 <x-app-layout>
     {{-- メインコンテンツ --}}
-    <main class="container mx-auto mt-8 p-4">
+    <div class="container mx-auto mt-8 p-4">
         <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden md:flex">
             <div class="md:w-1/2">
                 @if ($product->image_url)
@@ -47,14 +47,23 @@
 
                 <div class="flex flex-col space-y-4">
                     {{-- カートに追加ボタン --}}
-                    <form action="#" method="POST">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                        <button type="submit" class="w-64 bg-green-600 text-white text-xl font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg">
-                            カートに追加
+                     @if ($product->isAlcohol())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm" role="alert">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            アルコール飲料は、配達時間や年齢確認などの制限により、現在カートに追加できません。
+                        </div>
+                        <button type="button" class="w-full bg-gray-400 text-white text-xl font-bold py-3 px-6 rounded-lg cursor-not-allowed opacity-75 shadow-lg" disabled>
+                            カートに追加できません
                         </button>
-                    </form>
-
+                    @else
+                        <form action="#" method="POST"> {{-- カート機能のルートを後で設定 --}}
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <button type="submit" class="w-full bg-green-600 text-white text-xl font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg">
+                                カートに追加
+                            </button>
+                        </form>
+                    @endif
                     {{-- 戻るボタン --}}
                     <a href="{{ url()->previous() }}" class="w-64 mx-auto text-center bg-gray-500 text-white text-xl font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition duration-300 shadow-lg">
                         商品一覧に戻る
@@ -62,5 +71,5 @@
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 </x-app-layout>

@@ -18,19 +18,9 @@ class Product extends Model
         'is_limited',
         'limited_location',
     ];
-    /**
-     * Product は複数の Shop に属する (多対多)
-     * ★このメソッドを新規追加★
-     */
-    public function shops()
-    {
-        // 'shop_products' は中間テーブルの名前です。
-        // もし中間テーブル名が 'product_shop' など異なる場合は適宜変更してください。
-        return $this->belongsToMany(Shop::class, 'shop_products');
-    }
 
     /**
-     * Product は単一の Category に属する (多対一)
+     * 商品が属するカテゴリを取得
      */
     public function category()
     {
@@ -38,18 +28,33 @@ class Product extends Model
     }
 
     /**
-     * Product は複数の OrderItem に含まれる (一対多)
+     * 商品がアルコール飲料であるかを判定する
+     * @return bool
      */
-    public function orderItems()
+    public function isAlcohol(): bool
     {
-        return $this->hasMany(OrderItem::class);
-    }
+        // Categoryリレーションがロードされていることを確認
+        if (!$this->relationLoaded('category') || !$this->category) {
+            // カテゴリがロードされていない場合は、リロードするか、直接DBをクエリ
+            // ここではシンプルに、カテゴリがなければfalseとする
+            return false;
+        }
 
-    /**
-     * Product は複数の CartItem に含まれる (一対多)
-     */
-    public function cartItems()
-    {
-        return $this->hasMany(CartItem::class);
+        // アルコール関連のカテゴリ名を定義
+        $alcoholCategoryNames = [
+            'アルコール', // 親カテゴリ
+            'ビール',
+            '日本酒',
+            '焼酎',
+            'サワー・酎ハイ',
+            'その他アルコール',
+        ];
+
+        // 現在の商品のカテゴリ名、およびその親カテゴリ名がアルコール関連かどうかをチェック
+        $currentCategoryName = $this->category->name;
+        $parentCategoryName = $this->category->parent ? $this->category->parent->name : null;
+
+        return in_array($currentCategoryName, $alcoholCategoryNames) ||
+               ($parentCategoryName && in_array($parentCategoryName, $alcoholCategoryNames));
     }
 }
