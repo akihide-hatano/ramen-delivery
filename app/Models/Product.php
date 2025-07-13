@@ -10,20 +10,21 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'shop_id',
         'category_id',
         'name',
         'description',
         'price',
         'image_url',
     ];
-
     /**
-     * Product は単一の Shop に属する (多対一)
+     * Product は複数の Shop に属する (多対多)
+     * ★このメソッドを新規追加★
      */
-    public function shop()
+    public function shops()
     {
-        return $this->belongsTo(Shop::class);
+        // 'shop_products' は中間テーブルの名前です。
+        // もし中間テーブル名が 'product_shop' など異なる場合は適宜変更してください。
+        return $this->belongsToMany(Shop::class, 'shop_products');
     }
 
     /**
