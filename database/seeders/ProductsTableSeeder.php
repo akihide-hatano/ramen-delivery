@@ -45,7 +45,7 @@ class ProductsTableSeeder extends Seeder
         $chashuId = DB::table('categories')->where('name', 'チャーシュー')->first()->id;
         $ajitamagoId = DB::table('categories')->where('name', '味玉')->first()->id;
         $negiId = DB::table('categories')->where('name', 'ネギ')->first()->id;
-        $menmaId = DB::table('categories')->where('name', 'メンma')->first()->id;
+        $menmaId = DB::table('categories')->where('name', 'メンマ')->first()->id;
 
 
         // --- アプリケーション全体でユニークな商品マスターデータを定義 ---

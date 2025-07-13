@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ShopsTableSeeder::class,
             ProductsTableSeeder::class,
             // 必要に応じて他のシーダーもここに追加
+            ShopProductsTableSeeder::class, // ★最後に、店舗と商品の紐付けデータ★
         ]);
     }
 }
