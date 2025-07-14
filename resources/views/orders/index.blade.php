@@ -63,9 +63,8 @@
 
                     <h3 class="text-xl font-bold mb-4">配送先情報</h3>
                     {{-- 注文保存用のフォーム (actionは後でOrderControllerのstoreメソッドに設定) --}}
-                    <form action="#" method="POST"> {{-- ★★★後でroute('orders.store')に修正★★★ --}}
+                    <form action="{{ route('orders.store') }}" method="POST"> {{-- ★★★後でroute('orders.store')に修正★★★ --}}
                         @csrf
-
                         <div class="mb-4">
                             <label for="delivery_address" class="block text-gray-700 text-sm font-bold mb-2">
                                 配送先住所:
