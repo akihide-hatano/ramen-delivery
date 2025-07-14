@@ -21,7 +21,7 @@ class HomeController extends Controller
     {
         $latitude = (float)$request->query('lat');
         $longitude = (float)$request->query('lon');
-        $radiusKm = 50; // 検索半径（km）
+        $radiusKm = 20; // 検索半径（km）
 
         $nearbyShops = collect(); // 初期化
         $message = '位置情報を許可すると、お近くの店舗が表示されます。';
@@ -33,9 +33,9 @@ class HomeController extends Controller
 
             // データベースからすべての店舗を取得し、location_wktとして取得
             $shops = Shop::whereNotNull('location')
-                         ->select('*') // 全てのカラムを選択
-                         ->selectRaw("ST_AsText(location) AS location_wkt") // locationをWKT形式の文字列として取得
-                         ->get();
+                        ->select('*') // 全てのカラムを選択
+                        ->selectRaw("ST_AsText(location) AS location_wkt") // locationをWKT形式の文字列として取得
+                        ->get();
 
             $filteredShops = collect();
 
@@ -76,7 +76,7 @@ class HomeController extends Controller
             }
         } else {
             // 位置情報が取得できなかった場合のメッセージ
-             $message = '位置情報を許可すると、お近くの店舗が表示されます。';
+            $message = '位置情報を許可すると、お近くの店舗が表示されます。';
         }
 
         // おすすめメニューの取得
