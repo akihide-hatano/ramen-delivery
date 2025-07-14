@@ -46,12 +46,13 @@
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 <option value="">なし (最上位カテゴリ)</option>
                                 @foreach ($allCategories as $cat)
-                                    {{-- 編集対象カテゴリ自身は親にできない --}}
-                                    @if ($cat->id !== $category->id)
-                                        <option value="{{ $cat->id }}" {{ old('parent_id', $category->parent_id) == $cat->id ? 'selected' : '' }}>
-                                            {{ $cat->name }}
-                                        </option>
-                                    @endif
+                                {{-- 編集対象カテゴリ自身は親にできない --}}
+                                @if ($cat->id !== $category->id)
+                                    <option value="{{ $cat->id }}" {{ old('parent_id', $category->parent_id) == $cat->id ? 'selected' : '' }}>
+                                        {{-- ★ここを変更★ --}}
+                                        {{ $cat->getHierarchicalName() }}
+                                    </option>
+                                @endif
                                 @endforeach
                             </select>
                         </div>

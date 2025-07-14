@@ -38,4 +38,16 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    // カテゴリの階層名を取得するヘルパーメソッド
+    public function getHierarchicalName($separator = ' > ')
+    {
+        $names = [];
+        $current = $this;
+        while ($current) {
+            array_unshift($names, $current->name); // 先頭に追加
+            $current = $current->parent; // 親をたどる
+        }
+        return implode($separator, $names);
+    }
 }
