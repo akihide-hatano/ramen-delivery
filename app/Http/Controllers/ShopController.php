@@ -59,11 +59,11 @@ class ShopController extends Controller
             $shop->lat = null;
             $shop->lon = null;
         }
-        // ★★★修正ここまで★★★
+
 
         $shop->load('products'); // 店舗に紐づく商品（メニュー）をロード
 
-        $mapsApiKey = env('MAPS_API_KEY');
+        $mapsApiKey = env('Maps_API_KEY');
         $products = $shop->products;
 
         $userLat = (float)$request->query('lat');

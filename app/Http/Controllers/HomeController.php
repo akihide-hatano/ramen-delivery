@@ -56,7 +56,6 @@ class HomeController extends Controller
                         $shop->distance = $meters; // 店舗オブジェクトに距離を追加
                         $shop->lat = $shopLat; // 店舗オブジェクトに緯度を追加
                         $shop->lon = $shopLon; // 店舗オブジェクトに経度を追加
-
                         // 50km圏内の店舗のみをフィルタリング
                         if ($shop->distance <= $radiusKm * 1000) {
                             $filteredShops->push($shop);
@@ -95,7 +94,7 @@ class HomeController extends Controller
         $allProducts = Product::orderBy('name')->get();
 
         // Google Maps APIキーをビューに渡す
-        $mapsApiKey = env('MAPS_API_KEY');
+        $mapsApiKey = env('Maps_API_KEY');
 
         // ★★★ここを修正します: $latitude と $longitude をビューに渡す★★★
         return view('home', compact('nearbyShops', 'message', 'featuredProducts', 'allProducts', 'mapsApiKey', 'latitude', 'longitude'));
