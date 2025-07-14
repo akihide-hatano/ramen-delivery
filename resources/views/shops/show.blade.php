@@ -110,7 +110,7 @@
                     @endif
 
                     <div class="mt-8 text-center">
-                        <a href="{{ route('home') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                        <a href="{{ route('home.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                             他の店舗を探す
                         </a>
                     </div>

@@ -21,12 +21,13 @@ use App\Http\Controllers\OrderController; // 追加
 
 // HomeControllerのルート
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
-Route::get('/shops/search', [HomeController::class, 'search'])->name('shops.search');
 
 
 // ShopControllerのルート
-Route::get('/shops/{shop}', [ShopController::class, 'show'])->name('shops.show');
+Route::resource('shops', ShopController::class);
 
+// ProductControllerのルート
+Route::resource('products', ProductController::class);
 
 // ProductControllerのルート (必要であれば追加)
 // Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
