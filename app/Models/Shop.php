@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB; // DBファサードをuseする
+// ★「use Illuminate\Support\Facades\DB;」の行は削除されていることを確認してください★
 
 class Shop extends Model
 {
@@ -26,48 +26,17 @@ class Shop extends Model
         'accept_credit_card',
         'accept_e_money',
         'regular_holiday',
-        'location', // PostGISのlocationカラム
+        'location',
     ];
 
-    // productsとのリレーションを定義
+    // ★protected $casts プロパティの中に「'location' => 'string'」の行がないことを確認してください★
+    // 例えば、以下のようになっているはずです。
+    // protected $casts = [
+    //     // もし他のキャストがあればここに記述
+    // ];
+
     public function products()
     {
        return $this->belongsToMany(Product::class, 'shop_products');
     }
-
-    // ★★★ここからアクセサを追加★★★
-    /**
-     * Get the latitude from the location attribute.
-     *
-     * @return float|null
-     */
-    public function getLatAttribute(): ?float
-    {
-        // locationカラムがnullでない、かつPostGISのST_Y関数が利用可能なら緯度を取得
-        if ($this->location) {
-            // ST_Y(location::geometry) を使って緯度を抽出
-            // DB::raw() を使うことで、EloquentがSQL関数として認識する
-            $latitude = DB::selectOne("SELECT ST_Y(?::geometry) AS lat", [$this->location])->lat;
-            return (float) $latitude;
-        }
-        return null;
-    }
-
-    /**
-     * Get the longitude from the location attribute.
-     *
-     * @return float|null
-     */
-    public function getLonAttribute(): ?float
-    {
-        // locationカラムがnullでない、かつPostGISのST_X関数が利用可能なら経度を取得
-        if ($this->location) {
-            // ST_X(location::geometry) を使って経度を抽出
-            // DB::raw() を使うことで、EloquentがSQL関数として認識する
-            $longitude = DB::selectOne("SELECT ST_X(?::geometry) AS lon", [$this->location])->lon;
-            return (float) $longitude;
-        }
-        return null;
-    }
-    // ★★★アクセサここまで★★★
 }

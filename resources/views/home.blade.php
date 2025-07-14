@@ -1,28 +1,9 @@
 <x-app-layout>
-    {{-- x-app-layout の中でヘッダーが定義されているため、ここでは不要です --}}
-    <header class="bg-gray-800 text-white p-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-red-500">ラーメン潮屋</h1>
-            <nav>
-                <ul class="flex space-x-4">
-                    <li><a href="{{ route('home') }}" class="hover:text-red-500">ホーム</a></li>
-                    <li><a href="{{ route('shops.index') }}" class="hover:text-red-500">店舗一覧</a></li>
-                    @auth
-                        <li><a href="{{ route('dashboard') }}" class="hover:text-red-500">ダッシュボード</a></li>
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}" class="inline">
-                                @csrf
-                                <button type="submit" class="hover:text-red-500">ログアウト</button>
-                            </form>
-                        </li>
-                    @else
-                        <li><a href="{{ route('login') }}" class="hover:text-red-500">ログイン</a></li>
-                        <li><a href="{{ route('register') }}" class="hover:text-red-500">新規登録</a></li>
-                    @endauth
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('ホーム') }}
+        </h2>
+    </x-slot>
 
     <main>
         <section class="hero-section">
@@ -70,12 +51,11 @@
             <div class="container mx-auto">
                 <h3 class="text-3xl font-bold text-center text-gray-800 mb-8">お近くの店舗を探す</h3>
 
-                {{-- セッションメッセージの表示 --}}
-                @if (session('info'))
-                    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4" role="alert">
-                        {{ session('info') }}
-                    </div>
-                @endif
+                {{-- メッセージ表示 --}}
+                <div class="mb-4 p-3 bg-blue-100 text-blue-700 rounded-lg">
+                    {{ $message }}
+                </div>
+
                 {{-- 近くの店舗がある場合のみ表示 --}}
                 @if ($nearbyShops->isNotEmpty())
                     @foreach ($nearbyShops as $shop)
@@ -85,7 +65,7 @@
                                     <h4 class="text-2xl font-semibold text-gray-800 mb-4">{{ $shop->name }}</h4>
                                     <p class="text-gray-700 mb-2">住所: {{ $shop->address }}</p>
                                     <p class="text-gray-700 mb-2">電話: {{ $shop->phone_number }}</p>
-                                    <p class="text-gray-700 mb-4">営業時間: {{ $shop->business_hours ?? '不明' }}</p>
+                                    <p class="text-700 mb-4">営業時間: {{ $shop->business_hours ?? '不明' }}</p>
                                     {{-- 距離を表示 --}}
                                     @if (isset($shop->distance))
                                         <p class="text-gray-600 text-sm mb-4">
@@ -96,10 +76,10 @@
                                 </div>
                                 <div class="md:w-1/2 p-4">
                                     {{-- Google Maps Embed API を使用して地図を埋め込む --}}
-                                    @if ($shop->lat && $shop->lon)
+                                    {{-- ★mapsApiKey を直接使用★ --}}
+                                    @if ($shop->lat && $shop->lon && $mapsApiKey)
                                         @php
-                                            $apiKey = env('Maps_API_KEY');
-                                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$shop->lat},{$shop->lon}";
+                                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$mapsApiKey}&q={$shop->lat},{$shop->lon}";
                                         @endphp
                                         <iframe
                                             width="100%"
@@ -110,11 +90,10 @@
                                             allowfullscreen
                                             loading="lazy"
                                         ></iframe>
-                                    @elseif ($shop->address)
+                                    @elseif ($shop->address && $mapsApiKey)
                                         @php
-                                            $apiKey = env('Maps_API_KEY');
                                             $encodedAddress = urlencode($shop->address);
-                                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$encodedAddress}";
+                                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$mapsApiKey}&q={$encodedAddress}";
                                         @endphp
                                         <iframe
                                             width="100%"
@@ -137,9 +116,7 @@
                     {{-- 近くの店舗が見つからなかった場合、または位置情報がまだ取得されていない場合の表示 --}}
                     <div class="bg-white rounded-lg shadow-lg p-6 text-center">
                         <p class="text-gray-700">
-                            位置情報を許可すると、お近くの店舗が表示されます。
-                            <br>
-                            または、現在地から50km圏内に店舗が見つかりませんでした。
+                            {{ $message }}
                         </p>
                     </div>
                 @endif
@@ -153,19 +130,7 @@
             <div class="container mx-auto">
                 <h3 class="text-3xl font-bold text-center text-gray-800 mb-8">おすすめメニュー</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    @php
-                        // 全てのラーメンカテゴリからランダムに6つピックアップする例
-                        $ramenCategoryId = \App\Models\Category::where('name', 'ラーメン')->first()?->id;
-                        $featuredProducts = collect(); // 空のコレクションで初期化
-
-                        if ($ramenCategoryId) {
-                            $featuredProducts = \App\Models\Product::where('category_id', $ramenCategoryId)
-                                                                    ->inRandomOrder()
-                                                                    ->limit(6)
-                                                                    ->get();
-                        }
-                    @endphp
-
+                    {{-- ★修正: コントローラーから渡された $featuredProducts を使用★ --}}
                     @forelse ($featuredProducts as $product)
                         <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
                             @if ($product->image_url)
@@ -185,11 +150,52 @@
                 </div>
             </div>
         </section>
+
+        {{-- ★追加：全商品リストセクションをHomeControllerから渡された$allProductsで表示★ --}}
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 bg-white border-b border-gray-200">
+                        <h3 class="text-lg font-semibold mb-4">{{ __('全商品リスト') }}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @forelse ($allProducts as $product)
+                                <div class="bg-gray-50 p-4 rounded-lg shadow-md flex flex-col">
+                                    @if ($product->image_url)
+                                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-40 object-cover rounded-md mb-3">
+                                    @else
+                                        <div class="w-full h-40 bg-gray-200 rounded-md flex items-center justify-center text-gray-500 mb-3">
+                                            画像なし
+                                        </div>
+                                    @endif
+                                    <h4 class="text-md font-bold mb-1">{{ $product->name }}</h4>
+                                    <p class="text-sm text-gray-600 mb-2">{{ $product->description }}</p>
+                                    <p class="text-lg font-bold text-gray-900 mb-3">¥{{ number_format($product->price) }}</p>
+
+                                    {{-- カートに追加フォーム --}}
+                                    <form action="{{ route('cart.add') }}" method="POST" class="mt-auto flex items-center">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        <input type="number" name="quantity" value="1" min="1"
+                                            class="w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-center text-sm mr-2">
+                                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-semibold">
+                                            カートに追加
+                                        </button>
+                                    </form>
+                                </div>
+                            @empty
+                                <p class="col-span-full text-center text-gray-600">商品が登録されていません。</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- ★ここまで追加★ --}}
     </main>
 
     <footer class="bg-gray-800 text-white p-6 text-center mt-12">
         <p>© {{ date('Y') }} ラーメン潮屋. All rights reserved.</p>
-    </footer> 
+    </footer>
 
 {{-- home.blade.php の JavaScript コード --}}
 @push('scripts')
