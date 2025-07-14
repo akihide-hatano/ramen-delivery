@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminHomeController;
 use App\Http\Controllers\Admin\AdminShopController;
 use App\Http\Controllers\Admin\AdminProductController; // 管理者向けの商品コントローラー
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\CartController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -52,6 +53,15 @@ Route::get('/products', [ProductController::class, 'globalIndex'])->name('produc
 
 // 個別商品詳細（一般ユーザー向け）
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+
+// ★カート関連のルートを追加★
+Route::prefix('cart')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('index'); // カート表示
+    Route::post('/add', [CartController::class, 'add'])->name('add'); // カートに追加
+    Route::post('/update', [CartController::class, 'update'])->name('update'); // カート数量更新
+    Route::post('/remove', [CartController::class, 'remove'])->name('remove'); // カートから削除
+    Route::post('/clear', [CartController::class, 'clear'])->name('clear'); // カートクリア
+});
 
 // --- 5. 管理者向けのルート ---
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
