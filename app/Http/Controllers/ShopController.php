@@ -37,29 +37,24 @@ class ShopController extends Controller
         // 店舗数が多い場合は、Shop::paginate(10) のようにページネーションを使うことを検討してください。
         $shops = $query->get();
         // 取得した店舗の数をカウント
-        $shopCount = $shops->count(); // ← ここを追加
+        $shopCount = $shops->count();
 
-        // dd('$search');
         // 取得した店舗データと現在のフィルタリング状態を 'shops.index' ビューに渡します。
         return view('shops.index', compact('shops', 'prefecture','search','shopCount'));
     }
 
     public function show(Shop $shop)
     {
-         $shop->load('products');
+        // 店舗と関連する商品（メニュー）をロード
+        $shop->load('products'); // ★ここに修正はないが、この行は重要★
 
-        // ★★★ここを追加してください★★★
-        // 環境変数と$shopオブジェクトの内容を同時に確認
-        // dd([
-        //     'Maps_API_KEY_from_env' => env('Maps_API_KEY'),
-        //     'shop_lat' => $shop->lat,
-        //     'shop_lon' => $shop->lon,
-        //     'shop_address' => $shop->address,
-        // ]);
-                // ★★★ここを追加★★★
+        // ★★★ここを修正します★★★
         // APIキーをコントローラーで取得し、ビューに渡す
-        $apiKey = env('Maps_API_KEY');
-        return view('shops.show', compact('shop','apiKey'));
-    }
+        $mapsApiKey = env('MAPS_API_KEY'); // 変数名を $mapsApiKey に統一
 
+        // ロードした商品を変数に格納し、ビューに渡す
+        $products = $shop->products; // ★この行を追加★
+
+        return view('shops.show', compact('shop', 'mapsApiKey', 'products')); // ★'products' も渡すように修正★
+    }
 }

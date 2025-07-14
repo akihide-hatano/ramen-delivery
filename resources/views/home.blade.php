@@ -58,32 +58,28 @@
 
                 {{-- 近くの店舗がある場合のみ表示 --}}
                 @if ($nearbyShops->isNotEmpty())
-                    @foreach ($nearbyShops as $shop)
-                        <div class="bg-white rounded-lg shadow-lg p-6 mb-6"> {{-- 各店舗のカード --}}
-                            <div class="md:flex md:items-center">
-                                <div class="md:w-1/2 p-4">
-                                    <h4 class="text-2xl font-semibold text-gray-800 mb-4">{{ $shop->name }}</h4>
-                                    <p class="text-gray-700 mb-2">住所: {{ $shop->address }}</p>
-                                    <p class="text-gray-700 mb-2">電話: {{ $shop->phone_number }}</p>
-                                    <p class="text-700 mb-4">営業時間: {{ $shop->business_hours ?? '不明' }}</p>
-                                    {{-- 距離を表示 --}}
-                                    @if (isset($shop->distance))
-                                        <p class="text-gray-600 text-sm mb-4">
-                                            現在地から約 **{{ number_format($shop->distance / 1000, 1) }} km**
-                                        </p>
-                                    @endif
-                                    <a href="{{ route('shops.show', $shop) }}" class="inline-block bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300">店舗詳細を見る</a>
-                                </div>
-                                <div class="md:w-1/2 p-4">
-                                    {{-- Google Maps Embed API を使用して地図を埋め込む --}}
-                                    {{-- ★mapsApiKey を直接使用★ --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        @foreach ($nearbyShops as $shop)
+                            <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col"> {{-- 各店舗のカード --}}
+                                <h4 class="text-2xl font-semibold text-gray-800 mb-4">{{ $shop->name }}</h4>
+                                <p class="text-gray-700 mb-2">住所: {{ $shop->address }}</p>
+                                <p class="text-gray-700 mb-2">電話: {{ $shop->phone_number }}</p>
+                                <p class="text-gray-700 mb-4">営業時間: {{ $shop->business_hours ?? '不明' }}</p>
+                                {{-- 距離を表示 --}}
+                                @if (isset($shop->distance))
+                                    <p class="text-gray-600 text-sm mb-4">
+                                        現在地から約 **{{ number_format($shop->distance / 1000, 1) }} km**
+                                    </p>
+                                @endif
+                                {{-- Google Maps Embed API を使用して地図を埋め込む --}}
+                                <div class="w-full h-48 bg-gray-200 rounded-md mb-4 flex items-center justify-center">
                                     @if ($shop->lat && $shop->lon && $mapsApiKey)
                                         @php
                                             $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$mapsApiKey}&q={$shop->lat},{$shop->lon}";
                                         @endphp
                                         <iframe
                                             width="100%"
-                                            height="300"
+                                            height="100%"
                                             frameborder="0"
                                             style="border:0"
                                             src="{{ $embedSrc }}"
@@ -97,7 +93,7 @@
                                         @endphp
                                         <iframe
                                             width="100%"
-                                            height="300"
+                                            height="100%"
                                             frameborder="0"
                                             style="border:0"
                                             src="{{ $embedSrc }}"
@@ -105,13 +101,16 @@
                                             loading="lazy"
                                         ></iframe>
                                     @else
-                                        {{-- 地図情報がない場合のフォールバック画像 --}}
                                         <img src="https://placehold.co/600x300/E0E0E0/000000?text=Map+Data+Missing" alt="地図" class="w-full h-auto rounded-md shadow-md">
                                     @endif
                                 </div>
+                                {{-- ★追加: この店舗のメニューを見るリンク★ --}}
+                                <a href="{{ route('shops.show', $shop) }}" class="mt-auto inline-block bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300 text-center">
+                                    この店舗のメニューを見る
+                                </a>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 @else
                     {{-- 近くの店舗が見つからなかった場合、または位置情報がまだ取得されていない場合の表示 --}}
                     <div class="bg-white rounded-lg shadow-lg p-6 text-center">
@@ -130,7 +129,6 @@
             <div class="container mx-auto">
                 <h3 class="text-3xl font-bold text-center text-gray-800 mb-8">おすすめメニュー</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {{-- ★修正: コントローラーから渡された $featuredProducts を使用★ --}}
                     @forelse ($featuredProducts as $product)
                         <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
                             @if ($product->image_url)
@@ -151,8 +149,8 @@
             </div>
         </section>
 
-        {{-- ★追加：全商品リストセクションをHomeControllerから渡された$allProductsで表示★ --}}
-        <div class="py-12">
+        {{-- ★削除: 全商品リストセクションを削除します★ --}}
+        {{-- <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 bg-white border-b border-gray-200">
@@ -170,8 +168,6 @@
                                     <h4 class="text-md font-bold mb-1">{{ $product->name }}</h4>
                                     <p class="text-sm text-gray-600 mb-2">{{ $product->description }}</p>
                                     <p class="text-lg font-bold text-gray-900 mb-3">¥{{ number_format($product->price) }}</p>
-
-                                    {{-- カートに追加フォーム --}}
                                     <form action="{{ route('cart.add') }}" method="POST" class="mt-auto flex items-center">
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -189,8 +185,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-        {{-- ★ここまで追加★ --}}
+        </div> --}}
+        {{-- ★削除ここまで★ --}}
     </main>
 
     <footer class="bg-gray-800 text-white p-6 text-center mt-12">
