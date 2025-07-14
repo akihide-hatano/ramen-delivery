@@ -104,8 +104,8 @@
                                         <img src="https://placehold.co/600x300/E0E0E0/000000?text=Map+Data+Missing" alt="地図" class="w-full h-auto rounded-md shadow-md">
                                     @endif
                                 </div>
-                                {{-- ★追加: この店舗のメニューを見るリンク★ --}}
-                                <a href="{{ route('shops.show', $shop) }}" class="mt-auto inline-block bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300 text-center">
+                                {{-- ★修正: この店舗のメニューを見るリンクに緯度・経度をクエリパラメータとして渡す★ --}}
+                                <a href="{{ route('shops.show', ['shop' => $shop->id, 'lat' => $latitude, 'lon' => $longitude]) }}" class="mt-auto inline-block bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300 text-center">
                                     この店舗のメニューを見る
                                 </a>
                             </div>
@@ -149,44 +149,7 @@
             </div>
         </section>
 
-        {{-- ★削除: 全商品リストセクションを削除します★ --}}
-        {{-- <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 bg-white border-b border-gray-200">
-                        <h3 class="text-lg font-semibold mb-4">{{ __('全商品リスト') }}</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            @forelse ($allProducts as $product)
-                                <div class="bg-gray-50 p-4 rounded-lg shadow-md flex flex-col">
-                                    @if ($product->image_url)
-                                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-40 object-cover rounded-md mb-3">
-                                    @else
-                                        <div class="w-full h-40 bg-gray-200 rounded-md flex items-center justify-center text-gray-500 mb-3">
-                                            画像なし
-                                        </div>
-                                    @endif
-                                    <h4 class="text-md font-bold mb-1">{{ $product->name }}</h4>
-                                    <p class="text-sm text-gray-600 mb-2">{{ $product->description }}</p>
-                                    <p class="text-lg font-bold text-gray-900 mb-3">¥{{ number_format($product->price) }}</p>
-                                    <form action="{{ route('cart.add') }}" method="POST" class="mt-auto flex items-center">
-                                        @csrf
-                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                        <input type="number" name="quantity" value="1" min="1"
-                                            class="w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-center text-sm mr-2">
-                                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-semibold">
-                                            カートに追加
-                                        </button>
-                                    </form>
-                                </div>
-                            @empty
-                                <p class="col-span-full text-center text-gray-600">商品が登録されていません。</p>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> --}}
-        {{-- ★削除ここまで★ --}}
+        {{-- 全商品リストセクションは削除済み --}}
     </main>
 
     <footer class="bg-gray-800 text-white p-6 text-center mt-12">

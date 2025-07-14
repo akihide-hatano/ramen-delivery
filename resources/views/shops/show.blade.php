@@ -1,215 +1,121 @@
 <x-app-layout>
-    {{-- ヘッダー部分 --}}
-    <header class="bg-gray-800 text-white p-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-red-500">ラーメン潮屋</h1>
-            <nav>
-                <ul class="flex space-x-4">
-                    <li><a href="{{ route('home') }}" class="hover:text-red-500">ホーム</a></li>
-                    <li><a href="{{ route('shops.index') }}" class="hover:text-red-500">店舗一覧</a></li>
-                    @auth
-                        <li><a href="{{ route('dashboard') }}" class="hover:text-red-500">ダッシュボード</a></li>
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}" class="inline">
-                                @csrf
-                                <button type="submit" class="hover:text-red-500">ログアウト</button>
-                            </form>
-                        </li>
-                    @else
-                        <li><a href="{{ route('login') }}" class="hover:text-red-500">ログイン</a></li>
-                        <li><a href="{{ route('register') }}" class="hover:text-red-500">新規登録</a></li>
-                    @endauth
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ $shop->name }} のメニュー
+        </h2>
+    </x-slot>
 
-    {{-- メインコンテンツ --}}
-    <main class="container mx-auto mt-8 p-4">
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-6 text-center">{{ $shop->name }}</h1>
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <h3 class="text-2xl font-bold mb-4">{{ $shop->name }}</h3>
+                    <p class="text-gray-700 mb-2">住所: {{ $shop->address }}</p>
+                    <p class="text-gray-700 mb-4">電話: {{ $shop->phone_number }}</p>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {{-- 店舗情報と画像ギャラリー --}}
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">店舗情報</h2>
-                    <p class="text-lg mb-2"><i class="fas fa-map-marker-alt mr-2 text-red-500"></i>住所: {{ $shop->address }}</p>
-                    <p class="text-lg mb-2"><i class="fas fa-phone mr-2 text-red-500"></i>電話: {{ $shop->phone_number }}</p>
-                    <p class="text-lg mb-2"><i class="fas fa-clock mr-2 text-red-500"></i>営業時間: {{ $shop->business_hours ?? '不明' }}</p>
-                    @if ($shop->regular_holiday)
-                        <p class="text-lg mb-2"><i class="fas fa-calendar-times mr-2 text-red-500"></i>定休日: {{ $shop->regular_holiday }}</p>
-                    @endif
-
-                    @if ($shop->description)
-                        <p class="text-gray-700 mt-4 leading-relaxed">{{ $shop->description }}</p>
-                    @endif
-
-{{-- 設備情報 --}}
-                    <div class="mt-6">
-                        <h3 class="text-xl font-semibold mb-3">設備</h3>
-                        <ul class="grid grid-cols-2 gap-2 text-gray-700">
-                            {{-- 駐車場 --}}
-                            <li class="flex items-center">
-                                @if ($shop->has_parking)
-                                    <img src="{{ asset('images/features/parking_available.png') }}" alt="駐車場あり" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-800 font-medium">駐車場あり</span>
-                                @else
-                                    <img src="{{ asset('images/features/parking_unavailable.png') }}" alt="駐車場なし" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-500">駐車場なし</span>
-                                @endif
-                            </li>
-                            {{-- テーブル席 --}}
-                            <li class="flex items-center">
-                                @if ($shop->has_table_seats)
-                                    <img src="{{ asset('images/features/table_seat_available.png') }}" alt="テーブル席あり" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-800 font-medium">テーブル席あり</span>
-                                @else
-                                    <img src="{{ asset('images/features/table_seat_unavailable.png') }}" alt="テーブル席なし" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-500">テーブル席なし</span>
-                                @endif
-                            </li>
-                            {{-- カウンター席 --}}
-                            <li class="flex items-center">
-                                @if ($shop->has_counter_seats)
-                                    <img src="{{ asset('images/features/counter_seat_available.png') }}" alt="カウンター席あり" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-800 font-medium">カウンター席あり</span>
-                                @else
-                                    <img src="{{ asset('images/features/counter_seat_unavailable.png') }}" alt="カウンター席なし" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-500">カウンター席なし</span>
-                                @endif
-                            </li>
-                            {{-- 現金払い --}}
-                            <li class="flex items-center">
-                                @if ($shop->accept_cash)
-                                    <img src="{{ asset('images/features/cash_available.png') }}" alt="現金払い可" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-800 font-medium">現金払い可</span>
-                                @else
-                                    <img src="{{ asset('images/features/cash_unavailable.png') }}" alt="現金払い不可" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-500">現金払い不可</span>
-                                @endif
-                            </li>
-                            {{-- カード払い --}}
-                            <li class="flex items-center">
-                                @if ($shop->accept_credit_card)
-                                    <img src="{{ asset('images/features/credit_card_available.png') }}" alt="カード払い可" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-800 font-medium">カード払い可</span>
-                                @else
-                                    <img src="{{ asset('images/features/credit_card_unavailable.png') }}" alt="カード払い不可" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-500">カード払い不可</span>
-                                @endif
-                            </li>
-                            {{-- 電子マネー --}}
-                            <li class="flex items-center">
-                                @if ($shop->accept_e_money)
-                                    <img src="{{ asset('images/features/e_money_available.png') }}" alt="電子マネー可" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-800 font-medium">電子マネー可</span>
-                                @else
-                                    <img src="{{ asset('images/features/e_money_unavailable.png') }}" alt="電子マネー不可" class="h-6 w-6 mr-2 object-contain">
-                                    <span class="text-gray-500">電子マネー不可</span>
-                                @endif
-                            </li>
-                        </ul>
-                    </div>
-
-                    {{-- 店舗画像ギャラリー --}}
-                    <div class="mt-8">
-                        <h3 class="text-xl font-semibold mb-3">ギャラリー</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            @if ($shop->photo_1_url)
-                                <img src="{{ $shop->photo_1_url }}" alt="{{ $shop->name }} - 画像1" class="rounded-lg shadow-md w-full h-48 object-cover">
-                            @endif
-                            @if ($shop->photo_2_url)
-                                <img src="{{ $shop->photo_2_url }}" alt="{{ $shop->name }} - 画像2" class="rounded-lg shadow-md w-full h-48 object-cover">
-                            @endif
-                            @if ($shop->photo_3_url)
-                                <img src="{{ $shop->photo_3_url }}" alt="{{ $shop->name }} - 画像3" class="rounded-lg shadow-md w-full h-48 object-cover">
-                            @endif
-                            {{-- 画像がない場合のプレースホルダー --}}
-                            @if (!$shop->photo_1_url && !$shop->photo_2_url && !$shop->photo_3_url)
-                                <img src="https://placehold.co/600x400/E0E0E0/000000?text=No+Images" alt="画像なし" class="rounded-lg shadow-md w-full h-48 object-cover col-span-full">
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                {{-- 地図 --}}
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">地図</h2>
-                    @if ($shop->lat && $shop->lon)
-                        @php
-                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$shop->lat},{$shop->lon}";
-                        @endphp
-                        <iframe
-                            width="100%"
-                            height="450"
-                            frameborder="0"
-                            style="border:0"
-                            src="{{ $embedSrc }}"
-                            allowfullscreen
-                            loading="lazy"
-                            class="rounded-lg shadow-md"
-                        ></iframe>
-                    @elseif ($shop->address)
-                        @php
-                            $encodedAddress = urlencode($shop->address);
-                            $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$apiKey}&q={$encodedAddress}";
-                        @endphp
-                        <iframe
-                            width="100%"
-                            height="450"
-                            frameborder="0"
-                            style="border:0"
-                            src="{{ $embedSrc }}"
-                            allowfullscreen
-                            loading="lazy"
-                            class="rounded-lg shadow-md"
-                        ></iframe>
-                    @else
-                        <div class="bg-gray-100 p-4 rounded-lg text-center text-gray-600 h-full flex items-center justify-center">
-                            <p>地図情報がありません。</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            {{-- この店舗が提供する商品リスト --}}
-            @if ($shop->products->isNotEmpty())
-                <div class="mt-12">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">この店舗のおすすめメニュー</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        @foreach ($shop->products as $product)
-                            <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
-                                @if ($product->image_url)
-                                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-32 object-cover">
-                                @else
-                                    <img src="https://placehold.co/400x300/E0E0E0/000000?text=No+Image" alt="No Image" class="w-full h-32 object-cover">
-                                @endif
-                                <div class="p-3 text-center">
-                                    <h4 class="text-md font-semibold text-gray-800 truncate">{{ $product->name }}</h4>
-                                    <p class="text-red-600 font-bold text-lg mt-1">¥{{ number_format($product->price) }}</p>
-                                    <a href="{{ route('products.show', $product) }}" class="block text-center bg-green-500 text-white text-sm px-3 py-1 rounded-md mt-2 hover:bg-green-600 transition duration-300">詳細</a>
-                                </div>
+                    {{-- ★ここから配達可否メッセージの追加★ --}}
+                    @if (isset($distanceKm))
+                        <p class="text-lg mb-4">
+                            現在地からこの店舗まで: <span class="font-bold">{{ number_format($distanceKm, 1) }} km</span>
+                        </p>
+                        @if ($isDeliverable)
+                            <div class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg font-semibold">
+                                この店舗は現在地から{{ $deliveryRadiusKm }}km圏内のため配達可能です。
                             </div>
-                        @endforeach
+                        @else
+                            <div class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg font-semibold">
+                                この店舗は現在地から{{ $deliveryRadiusKm }}km圏外（{{ number_format($distanceKm, 1) }}km）のため、配達できません。
+                            </div>
+                        @endif
+                    @else
+                        <div class="mb-4 p-3 bg-blue-100 text-blue-700 rounded-lg font-semibold">
+                            位置情報が取得できなかったため、配達可否を判断できません。
+                            <br>ホーム画面で位置情報を許可してください。
+                        </div>
+                    @endif
+                    {{-- ★ここまで配達可否メッセージの追加★ --}}
+
+                    {{-- Google Maps Embed API を使用して地図を埋め込む (Canvasなし) --}}
+                    <h4 class="text-xl font-semibold mt-8 mb-4">店舗の場所</h4>
+                    <div class="w-full h-64 bg-gray-200 rounded-md mb-8 flex items-center justify-center">
+                        @if ($shop->lat && $shop->lon && $mapsApiKey)
+                            @php
+                                $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$mapsApiKey}&q={$shop->lat},{$shop->lon}";
+                            @endphp
+                            <iframe
+                                width="100%"
+                                height="100%"
+                                frameborder="0"
+                                style="border:0"
+                                src="{{ $embedSrc }}"
+                                allowfullscreen
+                                loading="lazy"
+                            ></iframe>
+                        @elseif ($shop->address && $mapsApiKey)
+                            @php
+                                $encodedAddress = urlencode($shop->address);
+                                $embedSrc = "https://www.google.com/maps/embed/v1/place?key={$mapsApiKey}&q={$encodedAddress}";
+                            @endphp
+                            <iframe
+                                width="100%"
+                                height="100%"
+                                frameborder="0"
+                                style="border:0"
+                                src="{{ $embedSrc }}"
+                                allowfullscreen
+                                loading="lazy"
+                            ></iframe>
+                        @else
+                            <p class="text-gray-500">地図データがありません。</p>
+                        @endif
+                    </div>
+
+                    <h4 class="text-xl font-semibold mt-8 mb-4">メニュー一覧</h4>
+                    @if ($products->isNotEmpty())
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @foreach ($products as $product)
+                                <div class="bg-gray-50 p-4 rounded-lg shadow-md flex flex-col">
+                                    @if ($product->image_url)
+                                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-40 object-cover rounded-md mb-3">
+                                    @else
+                                        <div class="w-full h-40 bg-gray-200 rounded-md flex items-center justify-center text-gray-500 mb-3">
+                                            画像なし
+                                        </div>
+                                    @endif
+                                    <h5 class="text-lg font-bold mb-1">{{ $product->name }}</h5>
+                                    <p class="text-sm text-gray-600 mb-2">{{ $product->description }}</p>
+                                    <p class="text-xl font-bold text-gray-900 mb-3">¥{{ number_format($product->price) }}</p>
+
+                                    {{-- カートに追加フォーム --}}
+                                    <form action="{{ route('cart.add') }}" method="POST" class="mt-auto flex items-center">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        <input type="hidden" name="shop_id" value="{{ $shop->id }}">
+                                        <input type="number" name="quantity" value="1" min="1"
+                                            class="w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-center text-sm mr-2"
+                                            {{-- ★追加: 配達不可の場合は数量入力を無効化★ --}}
+                                            @unless($isDeliverable) disabled @endunless>
+                                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-semibold
+                                            {{-- ★追加: 配達不可の場合はボタンを無効化しスタイルを変更★ --}}
+                                            @unless($isDeliverable) opacity-50 cursor-not-allowed @else hover:bg-green-700 @endunless"
+                                            @unless($isDeliverable) disabled @endunless>
+                                            カートに追加
+                                        </button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-gray-600">この店舗にはまだ商品が登録されていません。</p>
+                    @endif
+
+                    <div class="mt-8 text-center">
+                        <a href="{{ route('home') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                            他の店舗を探す
+                        </a>
                     </div>
                 </div>
-            @endif
-
-            <div class="mt-12 text-center">
-                <a href="{{ route('shops.index') }}" class="inline-block bg-gray-700 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-800 transition duration-300">
-                    <i class="fas fa-arrow-left mr-2"></i>店舗一覧に戻る
-                </a>
             </div>
         </div>
-    </main>
-
-    {{-- フッター部分 --}}
-    <footer class="bg-gray-800 text-white p-6 text-center mt-12">
-        <p>&copy; {{ date('Y') }} ラーメン潮屋. All rights reserved.</p>
-    </footer>
+    </div>
 </x-app-layout>
-
-@push('scripts')
-{{-- Font Awesome のCDNをheadに含めていない場合、ここで読み込むとアイコンが表示されます --}}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-@endpush

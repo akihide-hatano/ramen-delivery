@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Shop; // Shopモデルをuseする
+use App\Models\Shop;
+// use App\Models\Product; // Productモデルを使うならuseしておく
 
 class ShopController extends Controller
 {
@@ -15,46 +16,53 @@ class ShopController extends Controller
      */
     public function index(Request $request)
     {
-        // クエリパラメータから 'prefecture' を取得します。
-        // デフォルトはnullで、全ての店舗を意味します。
         $prefecture = $request->query('prefecture');
         $search = $request->query('search');
 
-        // Shopモデルのクエリビルダを開始
         $query = Shop::query();
-        // 'prefecture' パラメータが存在する場合、住所で絞り込みます。
-        // 例: '京都府' や '大阪府' を含む住所を検索
         if ($prefecture) {
             $query->where('address', 'like', $prefecture . '%');
         }
-        // 'search' パラメータが存在する場合、店舗名で絞り込みます。
-        // 部分一致検索のため、両端に '%' を追加します。
         if ($search) {
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        // 絞り込まれた店舗を取得します。
-        // 店舗数が多い場合は、Shop::paginate(10) のようにページネーションを使うことを検討してください。
         $shops = $query->get();
-        // 取得した店舗の数をカウント
         $shopCount = $shops->count();
 
-        // 取得した店舗データと現在のフィルタリング状態を 'shops.index' ビューに渡します。
         return view('shops.index', compact('shops', 'prefecture','search','shopCount'));
     }
 
-    public function show(Shop $shop)
+    public function show(Request $request, Shop $shop) // ★Request $request を追加★
     {
-        // 店舗と関連する商品（メニュー）をロード
-        $shop->load('products'); // ★ここに修正はないが、この行は重要★
+        $shop->load('products');
 
-        // ★★★ここを修正します★★★
-        // APIキーをコントローラーで取得し、ビューに渡す
-        $mapsApiKey = env('MAPS_API_KEY'); // 変数名を $mapsApiKey に統一
+        $mapsApiKey = env('MAPS_API_KEY');
+        $products = $shop->products;
 
-        // ロードした商品を変数に格納し、ビューに渡す
-        $products = $shop->products; // ★この行を追加★
+        // ★★★ここから追加★★★
+        $userLat = (float)$request->query('lat');
+        $userLon = (float)$request->query('lon');
+        $deliveryRadiusKm = 10; // 配達可能距離を10kmに設定
 
-        return view('shops.show', compact('shop', 'mapsApiKey', 'products')); // ★'products' も渡すように修正★
+        $distanceKm = null;
+        $isDeliverable = false;
+
+        // ユーザーの現在地と店舗の緯度経度が両方ある場合のみ距離を計算
+        if ($userLat && $userLon && $shop->lat && $shop->lon) {
+            $theta = $userLon - $shop->lon;
+            $dist = sin(deg2rad($userLat)) * sin(deg2rad($shop->lat)) + cos(deg2rad($userLat)) * cos(deg2rad($shop->lat)) * cos(deg2rad($theta));
+            $dist = acos($dist);
+            $dist = rad2deg($dist);
+            $meters = $dist * 60 * 1.1515 * 1609.344; // マイルからメートルに変換
+            $distanceKm = $meters / 1000; // メートルをキロメートルに変換
+
+            if ($distanceKm <= $deliveryRadiusKm) {
+                $isDeliverable = true;
+            }
+        }
+
+        // ビューに距離と配達可能フラグ、配達可能距離を渡す
+        return view('shops.show', compact('shop', 'mapsApiKey', 'products', 'distanceKm', 'isDeliverable', 'deliveryRadiusKm'));
     }
 }

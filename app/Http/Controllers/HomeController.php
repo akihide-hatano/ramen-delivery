@@ -32,7 +32,6 @@ class HomeController extends Controller
             $userLon = $longitude;
 
             // データベースからすべての店舗を取得し、location_wktとして取得
-            // ここでは距離計算は行わない
             $shops = Shop::whereNotNull('location')
                          ->select('*') // 全てのカラムを選択
                          ->selectRaw("ST_AsText(location) AS location_wkt") // locationをWKT形式の文字列として取得
@@ -92,12 +91,13 @@ class HomeController extends Controller
                                         ->get();
         }
 
-        // 全商品リストの取得
+        // 全商品リストの取得 (この変数はhome.blade.phpで使われていないため、削除しても良いですが、念のため残しておきます)
         $allProducts = Product::orderBy('name')->get();
 
         // Google Maps APIキーをビューに渡す
         $mapsApiKey = env('MAPS_API_KEY');
 
-        return view('home', compact('nearbyShops', 'message', 'featuredProducts', 'allProducts', 'mapsApiKey'));
+        // ★★★ここを修正します: $latitude と $longitude をビューに渡す★★★
+        return view('home', compact('nearbyShops', 'message', 'featuredProducts', 'allProducts', 'mapsApiKey', 'latitude', 'longitude'));
     }
 }
