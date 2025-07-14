@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdminShopController;
 use App\Http\Controllers\Admin\AdminProductController; // 管理者向けの商品コントローラー
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -62,6 +63,14 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::post('/remove', [CartController::class, 'remove'])->name('remove'); // カートから削除
     Route::post('/clear', [CartController::class, 'clear'])->name('clear'); // カートクリア
 });
+
+// ★★★ここから注文関連ルートを追加★★★
+Route::prefix('orders')->name('orders.')->middleware(['auth'])->group(function () {
+    Route::get('/checkout', [OrderController::class, 'index'])->name('index'); // 注文確認・配送先入力ページ
+    // Route::post('/', [OrderController::class, 'store'])->name('store'); // 注文保存 (次のステップで追加)
+    // Route::get('/complete', [OrderController::class, 'complete'])->name('complete'); // 注文完了ページ (次のステップで追加)
+});
+// ★★★注文関連ルートここまで★★★
 
 // --- 5. 管理者向けのルート ---
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
