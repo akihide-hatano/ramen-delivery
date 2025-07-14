@@ -45,13 +45,6 @@
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                         </div>
 
-                        {{-- メールアドレス --}}
-                        <div class="mb-4">
-                            <label for="email" class="block text-sm font-medium text-gray-700">メールアドレス</label>
-                            <input type="email" name="email" id="email" value="{{ old('email', $shop->email) }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        </div>
-
                         {{-- 説明 --}}
                         <div class="mb-4">
                             <label for="description" class="block text-sm font-medium text-gray-700">説明</label>
@@ -72,18 +65,6 @@
                             <input type="text" name="regular_holiday" id="regular_holiday" value="{{ old('regular_holiday', $shop->regular_holiday) }}"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="例: 不定休, 水曜日">
                         </div>
-
-                        {{-- ★緯度・経度入力フィールドを削除★ --}}
-                        {{-- <div class="mb-4">
-                            <label for="latitude" class="block text-sm font-medium text-gray-700">緯度</label>
-                            <input type="text" name="latitude" id="latitude" value="{{ old('latitude', $latitude) }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="例: 34.6667">
-                        </div>
-                        <div class="mb-4">
-                            <label for="longitude" class="block text-sm font-medium text-gray-700">経度</label>
-                            <input type="text" name="longitude" id="longitude" value="{{ old('longitude', $longitude) }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="例: 135.5000">
-                        </div> --}}
 
                         {{-- 現在の画像と新しい画像のアップロード --}}
                         @php
