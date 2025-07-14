@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Shop;
-// use App\Models\Product; // Productモデルを使うならuseしておく
+use Illuminate\Support\Facades\DB; // DBファサードをuseする
+use Illuminate\Support\Facades\Log; // Logファサードをuseする
 
 class ShopController extends Controller
 {
@@ -33,14 +34,38 @@ class ShopController extends Controller
         return view('shops.index', compact('shops', 'prefecture','search','shopCount'));
     }
 
-    public function show(Request $request, Shop $shop) // ★Request $request を追加★
+    public function show(Request $request, Shop $shop)
     {
-        $shop->load('products');
+        // ★★★ここを修正します★★★
+        // ルートモデルバインディングで取得した$shopはlat/lonを持たないので、
+        // location_wktを取得し、lat/lonをパースして$shopオブジェクトに設定し直す
+        $shop = Shop::where('id', $shop->id)
+                    ->select('*') // 全てのカラムを選択
+                    ->selectRaw("ST_AsText(location) AS location_wkt") // locationをWKT形式の文字列として取得
+                    ->firstOrFail(); // 該当店舗が見つからない場合は404エラー
+
+        // location_wktから緯度・経度をPHPでパースする
+        if ($shop->location_wkt) {
+            // "POINT(経度 緯度)" の形式から緯度・経度を正規表現で抽出
+            if (preg_match('/POINT\(([\d\.\-]+)\s+([\d\.\-]+)\)/', $shop->location_wkt, $matches)) {
+                $shop->lon = (float)$matches[1]; // 店舗の経度
+                $shop->lat = (float)$matches[2]; // 店舗の緯度
+            } else {
+                Log::warning("Failed to parse location_wkt in ShopController@show for shop ID {$shop->id}: " . $shop->location_wkt);
+                $shop->lat = null;
+                $shop->lon = null;
+            }
+        } else {
+            $shop->lat = null;
+            $shop->lon = null;
+        }
+        // ★★★修正ここまで★★★
+
+        $shop->load('products'); // 店舗に紐づく商品（メニュー）をロード
 
         $mapsApiKey = env('MAPS_API_KEY');
         $products = $shop->products;
 
-        // ★★★ここから追加★★★
         $userLat = (float)$request->query('lat');
         $userLon = (float)$request->query('lon');
         $deliveryRadiusKm = 10; // 配達可能距離を10kmに設定
