@@ -83,6 +83,24 @@
                             @enderror
                         </div>
 
+                        {{-- ★希望配達時間選択のドロップダウンを追加★ --}}
+                        <div class="mb-4">
+                            <label for="desired_delivery_time_slot" class="block text-gray-700 text-sm font-bold mb-2">
+                                希望配達時間:
+                            </label>
+                            <select name="desired_delivery_time_slot" id="desired_delivery_time_slot"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                required>
+                                @foreach (config('delivery.delivery_time_slots') as $key => $display)
+                                    <option value="{{ $key }}">{{ $display }}</option>
+                                @endforeach
+                            </select>
+                            @error('desired_delivery_time_slot')
+                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        {{-- ★追加ここまで★ --}}
+
                         <div class="mb-4">
                             <label for="delivery_address" class="block text-gray-700 text-sm font-bold mb-2">
                                 詳細住所:
@@ -109,13 +127,8 @@
                         </div>
 
                         {{-- JavaScriptで利用するデータをHTMLのdata属性に埋め込む --}}
-                        {{-- shopの緯度・経度 --}}
                         <div id="shop-data" data-lat="{{ $shop->lat ?? '' }}" data-lon="{{ $shop->lon ?? '' }}"></div>
-
-                        {{-- deliveryZones --}}
                         <div id="delivery-zones-data" data-zones="{{ json_encode($deliveryZones) }}"></div>
-
-                        {{-- configの配達設定 --}}
                         <div id="delivery-config"
                             data-base-prep-time="{{ config('delivery.base_preparation_time_minutes', 20) }}"
                             data-delivery-speed-per-km="{{ config('delivery.delivery_speed_minutes_per_km', 3) }}"
@@ -123,19 +136,21 @@
                             data-peak-surcharge="{{ config('delivery.peak_surcharge_minutes', 15) }}"
                             data-buffer-min="{{ config('delivery.buffer_minutes_min', 5) }}"
                             data-buffer-max="{{ config('delivery.buffer_minutes_max', 15) }}"
+                            data-time-slots="{{ json_encode(config('delivery.delivery_time_slots')) }}" {{-- ★追加★ --}}
                         ></div>
 
                         {{-- 予測配達時間の表示 --}}
                         <div class="mb-6 p-4 bg-yellow-50 rounded-lg text-yellow-800 font-semibold">
-                            <p>予測配達時間: 約 <span id="estimated-time">
+                            <p>予測配達時間: <span id="estimated-time-display">
                                 {{-- estimatedDeliveryTimeMinutes がセットされていればその値を、そうでなければデフォルトメッセージを表示 --}}
                                 @if (isset($estimatedDeliveryTimeMinutes))
-                                    {{ $estimatedDeliveryTimeMinutes }}
+                                    約 {{ $estimatedDeliveryTimeMinutes }} 分
                                 @else
                                     計算できませんでした。
                                 @endif
-                            </span> 分</p>
-                            <p class="text-sm text-yellow-700 mt-1">※エリア選択や現在の状況により変動する場合があります。</p>
+                            </span></p>
+                            <p class="text-sm text-yellow-700 mt-1">※エリア選択や希望配達時間、現在の状況により変動する場合があります。</p>
+                            <p id="earliest-arrival-message" class="text-sm text-yellow-700 mt-1"></p> {{-- ★追加: 最短到着時刻メッセージ★ --}}
                         </div>
 
                         <div class="flex items-center justify-between">
