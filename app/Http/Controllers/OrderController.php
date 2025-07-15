@@ -33,14 +33,13 @@ class OrderController extends Controller
         $cartItems = [];
         $totalPrice = 0;
 
-        // ★★★ここを修正します★★★
-        // Shop::find($cartShopId) の代わりに、selectRawでlatとlonを取得
-        $shop = Shop::selectRaw('*, ST_Y(location) as lat, ST_X(location) as lon')
-                    ->find($cartShopId);
-        // ★★★修正ここまで★★★
-
         $productIds = array_keys($cart);
         $products = Product::whereIn('id', $productIds)->get();
+
+        // ★★★ここを修正します★★★
+        // selectRawは不要になります
+        $shop = Shop::find($cartShopId);
+        // ★★★修正ここまで★★★
 
         if (!$shop) {
             Session::forget('cart');
@@ -60,14 +59,12 @@ class OrderController extends Controller
             ];
         }
 
-        // 配達エリアのリストをconfigから取得
         $deliveryZones = config('delivery.delivery_zones');
 
-        // デフォルトの予測配達時間を計算 (最初のエリアを仮定して計算)
         $estimatedDeliveryTimeMinutes = null;
+        // $shop->lat と $shop->lon が直接プロパティとして取得できるようになる
         if (!empty($deliveryZones) && $shop->lat && $shop->lon) {
-            // 例として最初のエリアの緯度経度を使って初期予測を出す
-            $firstZone = reset($deliveryZones); // 配列の最初の要素を取得
+            $firstZone = reset($deliveryZones);
             $estimatedDeliveryTimeMinutes = $this->calculateEstimatedDeliveryTime(
                 $shop->lat, $shop->lon,
                 $firstZone['latitude'], $firstZone['longitude']
@@ -87,7 +84,7 @@ class OrderController extends Controller
         $request->validate([
             'delivery_address' => 'required|string|max:255',
             'delivery_notes' => 'nullable|string|max:500',
-            'delivery_zone_name' => 'required|string|in:' . implode(',', array_keys(config('delivery.delivery_zones'))), // 配達エリア名を追加
+            'delivery_zone_name' => 'required|string|in:' . implode(',', array_keys(config('delivery.delivery_zones'))),
         ]);
 
         $cart = Session::get('cart', []);
@@ -113,22 +110,20 @@ class OrderController extends Controller
         }
 
         // ★★★ここも修正します★★★
-        // Shop::find($cartShopId) の代わりに、selectRawでlatとlonを取得
-        $shop = Shop::selectRaw('*, ST_Y(location) as lat, ST_X(location) as lon')
-                    ->find($cartShopId);
+        // selectRawは不要になります
+        $shop = Shop::find($cartShopId);
         // ★★★修正ここまで★★★
         
         if (!$shop) {
-            // ここでのエラーは通常発生しないはずだが、念のため
             return redirect()->route('cart.index')->with('error', '注文店舗が見つかりませんでした。');
         }
 
-        // 選択された配達エリアの緯度・経度を取得
         $selectedDeliveryZoneName = $request->input('delivery_zone_name');
         $deliveryZones = config('delivery.delivery_zones');
         $selectedZoneCoords = $deliveryZones[$selectedDeliveryZoneName] ?? null;
 
         $estimatedDeliveryTimeMinutes = null;
+        // $shop->lat と $shop->lon が直接プロパティとして取得できるようになる
         if ($selectedZoneCoords && $shop->lat && $shop->lon) {
             $estimatedDeliveryTimeMinutes = $this->calculateEstimatedDeliveryTime(
                 $shop->lat, $shop->lon,
@@ -146,9 +141,8 @@ class OrderController extends Controller
                 'delivery_address' => $request->input('delivery_address'),
                 'delivery_notes' => $request->input('delivery_notes'),
                 'status' => 'pending',
-                'delivery_zone_name' => $selectedDeliveryZoneName, // ★追加: 配達エリア名
-                'estimated_delivery_time_minutes' => $estimatedDeliveryTimeMinutes, // ★追加: 予測配達時間
-                // delivery_lat, delivery_lon は今回は使用しないため、DBから削除済みであればOK
+                'delivery_zone_name' => $selectedDeliveryZoneName,
+                'estimated_delivery_time_minutes' => $estimatedDeliveryTimeMinutes,
             ]);
 
             foreach ($cart as $productId => $quantity) {

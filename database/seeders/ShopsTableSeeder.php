@@ -35,10 +35,9 @@ class ShopsTableSeeder extends Seeder
                 'accept_e_money' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-                // ★追加: locationカラムにデータを挿入★
-                // 仮の緯度・経度。実際の場所に合わせて修正してください。
-                // ST_MakePoint(経度, 緯度) の順なので注意！
-                'location' => DB::raw("ST_SetSRID(ST_MakePoint(135.5000, 34.6667), 4326)::geography"), // 例: 難波駅周辺
+                // ★★★ここを修正: locationを削除し、latとlonを追加★★★
+                'lat' => 34.6667, // 緯度
+                'lon' => 135.5000, // 経度
             ],
             [
                 'name' => 'ラーメン潮屋 梅田店',
@@ -58,7 +57,8 @@ class ShopsTableSeeder extends Seeder
                 'accept_e_money' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-                'location' => DB::raw("ST_SetSRID(ST_MakePoint(135.4950, 34.7020), 4326)::geography"), // 例: 梅田駅周辺
+                'lat' => 34.7020, // 緯度
+                'lon' => 135.4950, // 経度
             ],
             [
                 'name' => 'ラーメン潮屋 芝田店',
@@ -78,10 +78,10 @@ class ShopsTableSeeder extends Seeder
                 'accept_e_money' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
-                'location' => DB::raw("ST_SetSRID(ST_MakePoint(135.4970, 34.7060), 4326)::geography"), // 例: 芝田周辺
+                'lat' => 34.7060, // 緯度
+                'lon' => 135.4970, // 経度
             ],
-            // --- ここからラーメン潮屋 京都の店舗を追加 ---
-            // 現在地を考慮し、京都市内の店舗にはより正確な緯度経度を設定すると良いでしょう
+            // --- ここからラーメン潮屋 京都の店舗 ---
             [
                 'name' => 'ラーメン潮屋 河原町三条店',
                 'address' => '京都府京都市中京区河原町通三条下る',
@@ -100,7 +100,8 @@ class ShopsTableSeeder extends Seeder
                 'accept_e_money' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-                'location' => DB::raw("ST_SetSRID(ST_MakePoint(135.7712, 35.0089), 4326)::geography"), // 例: 河原町三条交差点
+                'lat' => 35.0089, // 緯度
+                'lon' => 135.7712, // 経度
             ],
             [
                 'name' => 'ラーメン潮屋 河原町四条店',
@@ -120,7 +121,8 @@ class ShopsTableSeeder extends Seeder
                 'accept_e_money' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-                'location' => DB::raw("ST_SetSRID(ST_MakePoint(135.7699, 35.0039), 4326)::geography"), // 例: 河原町四条交差点
+                'lat' => 35.0039, // 緯度
+                'lon' => 135.7699, // 経度
             ],
             [
                 'name' => 'ラーメン潮屋 大宮店',
@@ -140,7 +142,8 @@ class ShopsTableSeeder extends Seeder
                 'accept_e_money' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
-                'location' => DB::raw("ST_SetSRID(ST_MakePoint(135.7533, 35.0069), 4326)::geography"), // 例: 大宮御池交差点
+                'lat' => 35.0069, // 緯度
+                'lon' => 135.7533, // 経度
             ],
             [
                 'name' => 'ラーメン潮屋 京都駅店',
@@ -160,7 +163,8 @@ class ShopsTableSeeder extends Seeder
                 'accept_e_money' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-                'location' => DB::raw("ST_SetSRID(ST_MakePoint(135.7588, 34.9856), 4326)::geography"), // 例: 京都駅中央口付近
+                'lat' => 34.9856, // 緯度
+                'lon' => 135.7588, // 経度
             ],
             [
                 'name' => 'ラーメン潮屋 烏丸店',
@@ -180,7 +184,8 @@ class ShopsTableSeeder extends Seeder
                 'accept_e_money' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-                'location' => DB::raw("ST_SetSRID(ST_MakePoint(135.7621, 35.0069), 4326)::geography"), // 例: 烏丸御池駅周辺
+                'lat' => 35.0069, // 緯度
+                'lon' => 135.7621, // 経度
             ],
             [
                 'name' => 'ラーメン潮屋 烏丸七条店',
@@ -200,7 +205,8 @@ class ShopsTableSeeder extends Seeder
                 'accept_e_money' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-                'location' => DB::raw("ST_SetSRID(ST_MakePoint(135.7617, 34.9930), 4326)::geography"), // 例: 烏丸七条交差点
+                'lat' => 34.9930, // 緯度
+                'lon' => 135.7617, // 経度
             ],
         ]);
     }
