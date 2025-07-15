@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Shop;
-use Illuminate\Support\Facades\DB; // DBファサードをuseする
-use Illuminate\Support\Facades\Log; // Logファサードをuseする
+use App\Models\Product; // Productモデルをuseに追加
+use App\Models\Category; // Categoryモデルをuseに追加
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ShopController extends Controller
 {
@@ -37,29 +39,18 @@ class ShopController extends Controller
     public function show(Request $request, Shop $shop)
     {
         // ★★★ここを修正します★★★
-        // ルートモデルバインディングで取得した$shopはlat/lonを持たないので、
-        // location_wktを取得し、lat/lonをパースして$shopオブジェクトに設定し直す
-        $shop = Shop::where('id', $shop->id)
-                    ->select('*') // 全てのカラムを選択
-                    ->selectRaw("ST_AsText(location) AS location_wkt") // locationをWKT形式の文字列として取得
-                    ->firstOrFail(); // 該当店舗が見つからない場合は404エラー
+        // ルートモデルバインディングで$shopオブジェクトは既に取得されているため、
+        // 再度データベースから取得する必要はありません。
+        // ただし、$shop->latと$shop->lonが確実にロードされていることを確認します。
+        // もしShopモデルの$castsでlat/lonをキャストしていない場合、
+        // ここで明示的にfloatにキャストすると安全です。
+        $shop->lat = (float) $shop->lat;
+        $shop->lon = (float) $shop->lon;
 
-        // location_wktから緯度・経度をPHPでパースする
-        if ($shop->location_wkt) {
-            // "POINT(経度 緯度)" の形式から緯度・経度を正規表現で抽出
-            if (preg_match('/POINT\(([\d\.\-]+)\s+([\d\.\-]+)\)/', $shop->location_wkt, $matches)) {
-                $shop->lon = (float)$matches[1]; // 店舗の経度
-                $shop->lat = (float)$matches[2]; // 店舗の緯度
-            } else {
-                Log::warning("Failed to parse location_wkt in ShopController@show for shop ID {$shop->id}: " . $shop->location_wkt);
-                $shop->lat = null;
-                $shop->lon = null;
-            }
-        } else {
-            $shop->lat = null;
-            $shop->lon = null;
-        }
-
+        // location_wktをパースするロジックは不要になります
+        // if ($shop->location_wkt) { ... } のブロックは削除
+        // $shop->lat と $shop->lon は既にモデルのプロパティとして利用可能です。
+        // ★★★修正ここまで★★★
 
         $shop->load('products'); // 店舗に紐づく商品（メニュー）をロード
 
@@ -74,6 +65,7 @@ class ShopController extends Controller
         $isDeliverable = false;
 
         // ユーザーの現在地と店舗の緯度経度が両方ある場合のみ距離を計算
+        // $shop->lat と $shop->lon は既に数値として利用可能です。
         if ($userLat && $userLon && $shop->lat && $shop->lon) {
             $theta = $userLon - $shop->lon;
             $dist = sin(deg2rad($userLat)) * sin(deg2rad($shop->lat)) + cos(deg2rad($userLat)) * cos(deg2rad($shop->lat)) * cos(deg2rad($theta));
