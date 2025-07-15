@@ -18,6 +18,7 @@ class Product extends Model
         'image_url',
         'is_limited',
         'limited_location',
+        'is_delivery',
     ];
 
     /**
