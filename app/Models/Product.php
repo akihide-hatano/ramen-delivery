@@ -11,6 +11,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id',
+        'shop_id', // ★追加: shop_idをfillableに追加
         'name',
         'description',
         'price',
@@ -25,6 +26,15 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * 商品が属する店舗を取得
+     * ★追加: このリレーションが不足していました
+     */
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class);
     }
 
     /**

@@ -98,7 +98,7 @@ class ProductController extends Controller
                             }
                         }
                         if ($deepNestedGroups->isNotEmpty()) {
-                             $subCategoryGroups->put($subCategory->name, $deepNestedGroups);
+                            $subCategoryGroups->put($subCategory->name, $deepNestedGroups);
                         }
                     } else {
                         $productsInSubCategory = $productsToGroup->where('category_id', $subCategory->id)->sortBy('name');
