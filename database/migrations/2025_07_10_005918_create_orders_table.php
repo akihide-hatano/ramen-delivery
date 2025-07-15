@@ -21,6 +21,7 @@ return new class extends Migration
 
             // delivery_address
             $table->string('delivery_address', 255);
+            $table->text('delivery_notes')->nullable(); // メモは長文になる可能性があるのでtext型、任意なのでnullable()
             // total_amount
             $table->integer('total_amount');
 
