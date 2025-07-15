@@ -11,7 +11,6 @@ use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
