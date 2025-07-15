@@ -19,6 +19,8 @@ class Order extends Model
         'shop_id',
         'delivery_address',
         'total_amount',
+        'delivery_address',
+        'delivery_notes',
         'status',
     ];
 

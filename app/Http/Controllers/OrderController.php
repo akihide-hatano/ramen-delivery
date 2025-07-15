@@ -10,6 +10,7 @@ use App\Models\Order; // Orderモデルを追加
 use App\Models\OrderItem; // OrderItemモデルを追加
 use App\Models\Product; // Productモデルを追加
 use App\Models\Shop; // Shopモデルを追加
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -66,11 +67,14 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        //  dd('storeメソッドが開始されました。'); // ★追加1: メソッドが呼び出されたか確認
         // リクエストデータのバリデーション
         $request->validate([
             'delivery_address' => 'required|string|max:255',
             'delivery_notes' => 'nullable|string|max:500',
         ]);
+
+         dump($request->all()); // ★追加2: リクエストデータを確認
 
         $cart = Session::get('cart', []);
         $cartShopId = Session::get('cart_shop_id');
@@ -103,7 +107,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => Auth::id(), // ログインユーザーのID
                 'shop_id' => $cartShopId,
-                'total_price' => $totalPrice,
+                'total_amount' => $totalPrice,
                 'delivery_address' => $request->input('delivery_address'),
                 'delivery_notes' => $request->input('delivery_notes'),
                 'status' => 'pending', // 例: 'pending', 'completed', 'cancelled' など
