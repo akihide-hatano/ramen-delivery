@@ -31,40 +31,35 @@ class HomeController extends Controller
             $userLat = $latitude;
             $userLon = $longitude;
 
-            // データベースからすべての店舗を取得し、location_wktとして取得
-            $shops = Shop::whereNotNull('location')
-                        ->select('*') // 全てのカラムを選択
-                        ->selectRaw("ST_AsText(location) AS location_wkt") // locationをWKT形式の文字列として取得
+            // ★★★ここを修正します★★★
+            // locationカラムではなく、latとlonカラムからデータを取得
+            $shops = Shop::select('*') // 全てのカラムを選択
+                        ->whereNotNull('lat') // latがnullでない店舗をフィルタリング
+                        ->whereNotNull('lon') // lonがnullでない店舗をフィルタリング
                         ->get();
 
             $filteredShops = collect();
 
             foreach ($shops as $shop) {
-                if ($shop->location_wkt) {
-                    // "POINT(経度 緯度)" の形式から緯度・経度を正規表現で抽出
-                    if (preg_match('/POINT\(([\d\.\-]+)\s+([\d\.\-]+)\)/', $shop->location_wkt, $matches)) {
-                        $shopLon = (float)$matches[1]; // 店舗の経度
-                        $shopLat = (float)$matches[2]; // 店舗の緯度
+                // location_wktではなく、直接$shop->latと$shop->lonを使用
+                $shopLat = (float)$shop->lat; // 店舗の緯度
+                $shopLon = (float)$shop->lon; // 店舗の経度
 
-                        // PHPでハバーサインの公式を使って距離を計算（メートル単位）
-                        $theta = $userLon - $shopLon;
-                        $dist = sin(deg2rad($userLat)) * sin(deg2rad($shopLat)) + cos(deg2rad($userLat)) * cos(deg2rad($shopLat)) * cos(deg2rad($theta));
-                        $dist = acos($dist);
-                        $dist = rad2deg($dist);
-                        $meters = $dist * 60 * 1.1515 * 1609.344; // マイルからメートルに変換
+                // PHPでハバーサインの公式を使って距離を計算（メートル単位）
+                $theta = $userLon - $shopLon;
+                $dist = sin(deg2rad($userLat)) * sin(deg2rad($shopLat)) + cos(deg2rad($userLat)) * cos(deg2rad($shopLat)) * cos(deg2rad($theta));
+                $dist = acos($dist);
+                $dist = rad2deg($dist);
+                $meters = $dist * 60 * 1.1515 * 1609.344; // マイルからメートルに変換
 
-                        $shop->distance = $meters; // 店舗オブジェクトに距離を追加
-                        $shop->lat = $shopLat; // 店舗オブジェクトに緯度を追加
-                        $shop->lon = $shopLon; // 店舗オブジェクトに経度を追加
-                        // 50km圏内の店舗のみをフィルタリング
-                        if ($shop->distance <= $radiusKm * 1000) {
-                            $filteredShops->push($shop);
-                        }
-                    } else {
-                        Log::warning("Failed to parse location_wkt for shop ID {$shop->id}: " . $shop->location_wkt);
-                    }
+                $shop->distance = $meters; // 店舗オブジェクトに距離を追加
+                // $shop->lat と $shop->lon は既にオブジェクトにあるので再代入は不要
+                // 50km圏内の店舗のみをフィルタリング
+                if ($shop->distance <= $radiusKm * 1000) {
+                    $filteredShops->push($shop);
                 }
             }
+            // ★★★修正ここまで★★★
 
             // 距離でソート
             $nearbyShops = $filteredShops->sortBy('distance')->values();
@@ -96,7 +91,6 @@ class HomeController extends Controller
         // Google Maps APIキーをビューに渡す
         $mapsApiKey = env('Maps_API_KEY');
 
-        // ★★★ここを修正します: $latitude と $longitude をビューに渡す★★★
         return view('home', compact('nearbyShops', 'message', 'featuredProducts', 'allProducts', 'mapsApiKey', 'latitude', 'longitude'));
     }
 }
