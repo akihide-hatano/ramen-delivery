@@ -17,7 +17,7 @@ class ProductController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function globalIndex()
+    public function index()
     {
         // 1. 全ての商品を取得（カテゴリ情報も一緒にロード）
         // ここも with(['category.parent']) に変更
