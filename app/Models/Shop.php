@@ -26,7 +26,8 @@ class Shop extends Model
         'accept_credit_card',
         'accept_e_money',
         'regular_holiday',
-        'location',
+        'lat', // ★★★追加★★★
+        'lon', // ★★★追加★★★
     ];
 
     // ★protected $casts プロパティの中に「'location' => 'string'」の行がないことを確認してください★
