@@ -33,9 +33,14 @@ class OrderController extends Controller
         $cartItems = [];
         $totalPrice = 0;
 
+        // ★★★ここを修正します★★★
+        // Shop::find($cartShopId) の代わりに、selectRawでlatとlonを取得
+        $shop = Shop::selectRaw('*, ST_Y(location) as lat, ST_X(location) as lon')
+                    ->find($cartShopId);
+        // ★★★修正ここまで★★★
+
         $productIds = array_keys($cart);
         $products = Product::whereIn('id', $productIds)->get();
-        $shop = Shop::find($cartShopId);
 
         if (!$shop) {
             Session::forget('cart');
@@ -107,7 +112,12 @@ class OrderController extends Controller
             }
         }
 
-        $shop = Shop::find($cartShopId);
+        // ★★★ここも修正します★★★
+        // Shop::find($cartShopId) の代わりに、selectRawでlatとlonを取得
+        $shop = Shop::selectRaw('*, ST_Y(location) as lat, ST_X(location) as lon')
+                    ->find($cartShopId);
+        // ★★★修正ここまで★★★
+        
         if (!$shop) {
             // ここでのエラーは通常発生しないはずだが、念のため
             return redirect()->route('cart.index')->with('error', '注文店舗が見つかりませんでした。');
