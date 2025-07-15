@@ -62,17 +62,38 @@
                     </div>
 
                     <h3 class="text-xl font-bold mb-4">配送先情報</h3>
-                    {{-- 注文保存用のフォーム (actionは後でOrderControllerのstoreメソッドに設定) --}}
-                    <form action="{{ route('orders.store') }}" method="POST"> {{-- ★★★後でroute('orders.store')に修正★★★ --}}
+                    <form action="{{ route('orders.store') }}" method="POST">
                         @csrf
+
+                        {{-- 配達エリア選択のドロップダウン --}}
+                        <div class="mb-4">
+                            <label for="delivery_zone_name" class="block text-gray-700 text-sm font-bold mb-2">
+                                配達エリア:
+                            </label>
+                            <select name="delivery_zone_name" id="delivery_zone_name"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                required>
+                                <option value="">エリアを選択してください</option>
+                                @foreach ($deliveryZones as $zoneName => $coords)
+                                    <option value="{{ $zoneName }}">{{ $zoneName }}</option>
+                                @endforeach
+                            </select>
+                            @error('delivery_zone_name')
+                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <div class="mb-4">
                             <label for="delivery_address" class="block text-gray-700 text-sm font-bold mb-2">
-                                配送先住所:
+                                詳細住所:
                             </label>
                             <input type="text" name="delivery_address" id="delivery_address"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="例: 京都府京都市中京区〇〇1-2-3" required
-                                value="{{ Auth::user()->address ?? '' }}"> {{-- 認証済みユーザーの住所をデフォルト値に (あれば) --}}
+                                placeholder="例: 〇〇区〇〇1-2-3 〇〇マンション101号室" required
+                                value="{{ Auth::user()->address ?? '' }}">
+                            @error('delivery_address')
+                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="mb-6">
@@ -82,6 +103,39 @@
                             <textarea name="delivery_notes" id="delivery_notes" rows="3"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 placeholder="例: 玄関前に置いてください、インターホンは押さないでください"></textarea>
+                            @error('delivery_notes')
+                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- JavaScriptで利用するデータをHTMLのdata属性に埋め込む --}}
+                        {{-- shopの緯度・経度 --}}
+                        <div id="shop-data" data-lat="{{ $shop->lat ?? '' }}" data-lon="{{ $shop->lon ?? '' }}"></div>
+
+                        {{-- deliveryZones --}}
+                        <div id="delivery-zones-data" data-zones="{{ json_encode($deliveryZones) }}"></div>
+
+                        {{-- configの配達設定 --}}
+                        <div id="delivery-config"
+                            data-base-prep-time="{{ config('delivery.base_preparation_time_minutes', 20) }}"
+                            data-delivery-speed-per-km="{{ config('delivery.delivery_speed_minutes_per_km', 3) }}"
+                            data-peak-hours="{{ json_encode(config('delivery.peak_hours', [])) }}"
+                            data-peak-surcharge="{{ config('delivery.peak_surcharge_minutes', 15) }}"
+                            data-buffer-min="{{ config('delivery.buffer_minutes_min', 5) }}"
+                            data-buffer-max="{{ config('delivery.buffer_minutes_max', 15) }}"
+                        ></div>
+
+                        {{-- 予測配達時間の表示 --}}
+                        <div class="mb-6 p-4 bg-yellow-50 rounded-lg text-yellow-800 font-semibold">
+                            <p>予測配達時間: 約 <span id="estimated-time">
+                                {{-- estimatedDeliveryTimeMinutes がセットされていればその値を、そうでなければデフォルトメッセージを表示 --}}
+                                @if (isset($estimatedDeliveryTimeMinutes))
+                                    {{ $estimatedDeliveryTimeMinutes }}
+                                @else
+                                    計算できませんでした。
+                                @endif
+                            </span> 分</p>
+                            <p class="text-sm text-yellow-700 mt-1">※エリア選択や現在の状況により変動する場合があります。</p>
                         </div>
 
                         <div class="flex items-center justify-between">

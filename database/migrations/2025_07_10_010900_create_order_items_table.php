@@ -14,16 +14,12 @@ return new class extends Migration
         Schema::create('order_items', function (Blueprint $table) {
             // id
             $table->id();
-
             // order_idの外部キー
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
-
             // product_idの外部キー
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
-
             //注文数量
             $table->integer('quantity');
-
             //注文時の金額
             $table->integer('unit_price');
         });

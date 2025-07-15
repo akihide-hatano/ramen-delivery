@@ -20,7 +20,8 @@ return new class extends Migration
 
             // quantity
             $table->integer('quantity');
-
+            //unit_price
+            $table->integer('unit_price'); 
             // 同じカート内で同じ商品が複数回追加されることを防ぎ、数量を更新する仕組みにする場合
             // このユニーク制約を追加することで、同じ商品がカートに複数行登録されるのを防ぎます。
             // アプリケーション側で、既に商品が存在する場合はquantityを更新するロジックが必要になります。

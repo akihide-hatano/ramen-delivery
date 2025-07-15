@@ -22,6 +22,8 @@ class Order extends Model
         'delivery_address',
         'delivery_notes',
         'status',
+        'delivery_zone_name', // ★追加★
+        'estimated_delivery_time_minutes', // ★追加★
     ];
 
     /**
