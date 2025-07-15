@@ -22,8 +22,9 @@ class Order extends Model
         'delivery_address',
         'delivery_notes',
         'status',
-        'delivery_zone_name', // ★追加★
-        'estimated_delivery_time_minutes', // ★追加★
+        'delivery_zone_name',
+        'estimated_delivery_time_minutes',
+        'desired_delivery_time',
     ];
 
     /**
@@ -32,9 +33,7 @@ class Order extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        // status は文字列なので特にキャストは不要ですが、
-        // 必要に応じてenumキャストなども検討できます（Laravel 10+）
-        // 'status' => OrderStatusEnum::class, // 例
+        'desired_delivery_time' => 'datetime',
     ];
 
     /**
