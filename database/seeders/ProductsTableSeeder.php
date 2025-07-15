@@ -6,8 +6,8 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product;
-use App\Models\Category; // Categoryモデルをインポート
-use App\Models\Shop;     // ★Shopモデルをインポート
+use App\Models\Category;
+use App\Models\Shop;
 
 class ProductsTableSeeder extends Seeder
 {
@@ -45,7 +45,7 @@ class ProductsTableSeeder extends Seeder
         $toppingCategoryId = DB::table('categories')->where('name', 'トッピング')->first()->id;
 
 
-        // ★Shopモデルから正式な店舗名を取得し、変数に格納
+        // Shopモデルから正式な店舗名を取得し、変数に格納
         // ShopsTableSeederで定義されている正確な店舗名を使用してください
         $nambaShopName = Shop::where('name', 'ラーメン潮屋 大阪難波店')->first()->name;
         $umedaShopName = Shop::where('name', 'ラーメン潮屋 梅田店')->first()->name;
@@ -54,7 +54,7 @@ class ProductsTableSeeder extends Seeder
         $kawaShijoShopName = Shop::where('name', 'ラーメン潮屋 河原町四条店')->first()->name;
         $kyotoEkiShopName = Shop::where('name', 'ラーメン潮屋 京都駅店')->first()->name;
         $omiyaShopName = Shop::where('name', 'ラーメン潮屋 大宮店')->first()->name;
-        $karasumaShopName = Shop::where('name', 'ラーメン潮屋 烏丸店')->first()->name; // 烏丸店を追加
+        $karasumaShopName = Shop::where('name', 'ラーメン潮屋 烏丸店')->first()->name;
         $karasumaShichijoShopName = Shop::where('name', 'ラーメン潮屋 烏丸七条店')->first()->name;
 
 
@@ -69,7 +69,8 @@ class ProductsTableSeeder extends Seeder
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shioya+Base+Ramen',
                 'is_limited' => false,
                 'limited_location' => null,
-                'limited_type' => null, // 共通商品なのでnull
+                'limited_type' => null,
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -79,9 +80,10 @@ class ProductsTableSeeder extends Seeder
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Ajitama+Shio+Ramen',
                 'is_limited' => false,
                 'limited_location' => null,
-                'limited_type' => null, // 共通商品なのでnull
+                'limited_type' => null,
+                'is_delivery' => true, // ★配達可能★
             ],
-            // ★限定商品に is_limited => true と limited_location を正式な店舗名で設定★
+            // 限定ラーメン
             [
                 'category_id' => $shioRamenId,
                 'name' => '焦がし醤油塩ラーメン',
@@ -89,8 +91,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 950,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Namba+Kogashi+Shio',
                 'is_limited' => true,
-                'limited_location' => $nambaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $nambaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -99,8 +102,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1000,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Butter+Corn+Shio',
                 'is_limited' => true,
-                'limited_location' => $shibataShopName, // ★正式な店舗名を使用★
+                'limited_location' => $shibataShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -109,8 +113,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 960,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Umeda+Ume+Shiso+Shio',
                 'is_limited' => true,
-                'limited_location' => $umedaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $umedaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -119,8 +124,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 990,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Seabura+Shio',
                 'is_limited' => true,
-                'limited_location' => $umedaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $umedaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -129,8 +135,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 950,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shibata+Lemon+Shio',
                 'is_limited' => true,
-                'limited_location' => $shibataShopName, // ★正式な店舗名を使用★
+                'limited_location' => $shibataShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -139,8 +146,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1020,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Tantan+Shio',
                 'is_limited' => true,
-                'limited_location' => $karasumaShichijoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $karasumaShichijoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -149,8 +157,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 970,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=KawaSanjo+Yuzu+Shio',
                 'is_limited' => true,
-                'limited_location' => $kawaSanjoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $kawaSanjoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -159,8 +168,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1050,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Toripaitan+Shio',
                 'is_limited' => true,
-                'limited_location' => $kawaSanjoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $kawaSanjoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -169,8 +179,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 980,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shijo+Kogashi+Negi+Shio',
                 'is_limited' => true,
-                'limited_location' => $kawaShijoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $kawaShijoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -179,8 +190,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1000,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Kujo+Negi+Shio',
                 'is_limited' => true,
-                'limited_location' => $kyotoEkiShopName, // ★正式な店舗名を使用★
+                'limited_location' => $kyotoEkiShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -189,8 +201,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 990,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Omiya+Garlic+Shio',
                 'is_limited' => true,
-                'limited_location' => $omiyaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $omiyaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -199,8 +212,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1030,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Omiya+Miso+Shio',
                 'is_limited' => true,
-                'limited_location' => $omiyaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $omiyaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -209,8 +223,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1100,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Kyoto+Duck+Shio',
                 'is_limited' => true,
-                'limited_location' => $kyotoEkiShopName, // ★正式な店舗名を使用★
+                'limited_location' => $kyotoEkiShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -219,8 +234,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 960,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Tororo+Kombu+Shio',
                 'is_limited' => true,
-                'limited_location' => $kyotoEkiShopName, // ★正式な店舗名を使用★
+                'limited_location' => $kyotoEkiShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -229,8 +245,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1020,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Karasuma+Shrimp+Shio',
                 'is_limited' => true,
-                'limited_location' => $karasumaShichijoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $karasumaShichijoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -239,8 +256,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 980,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shio+Tonkotsu',
                 'is_limited' => true,
-                'limited_location' => $nambaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $nambaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -249,8 +267,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 1000,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Shichijo+Clam+Shio',
                 'is_limited' => true,
-                'limited_location' => $karasumaShichijoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $karasumaShichijoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $shioRamenId,
@@ -259,11 +278,12 @@ class ProductsTableSeeder extends Seeder
                 'price' => 990,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Spicy+Miso+Shio',
                 'is_limited' => true,
-                'limited_location' => $umedaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $umedaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => true, // ★配達可能★
             ],
 
-            // サイドメニュー（共通商品）
+            // サイドメニュー
             [
                 'category_id' => $chahanId,
                 'name' => '半チャーハン',
@@ -273,6 +293,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $gohanmonoId,
@@ -283,6 +304,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $gohanmonoId,
@@ -293,6 +315,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $karaageId,
@@ -303,6 +326,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $gyozaId,
@@ -313,6 +337,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => true, // ★配達可能★
             ],
             [
                 'category_id' => $ippinryoriId,
@@ -323,8 +348,9 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
-            // ★限定サイドメニュー・ドリンクにも is_limited => true と limited_location を正式な店舗名で設定★
+            // 限定サイドメニュー・ドリンク
             [
                 'category_id' => $ippinryoriId,
                 'name' => 'たこ焼き（3個）',
@@ -332,8 +358,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 300,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Takoyaki',
                 'is_limited' => true,
-                'limited_location' => $nambaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $nambaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $gohanmonoId,
@@ -342,8 +369,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 450,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Mini+Curry+Don',
                 'is_limited' => true,
-                'limited_location' => $umedaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $umedaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $ippinryoriId,
@@ -352,8 +380,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 500,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Dashimaki+Tamago',
                 'is_limited' => true,
-                'limited_location' => $kawaSanjoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $kawaSanjoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $ippinryoriId,
@@ -362,8 +391,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 380,
                 'image_url' => null,
                 'is_limited' => true,
-                'limited_location' => $omiyaShopName, // ★正式な店舗名を使用★
+                'limited_location' => $omiyaShopName,
                 'limited_type' => 'location',
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $gohanmonoId,
@@ -372,8 +402,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 300,
                 'image_url' => null,
                 'is_limited' => true,
-                'limited_location' => $kyotoEkiShopName, // ★正式な店舗名を使用★
+                'limited_location' => $kyotoEkiShopName,
                 'limited_type' => 'location',
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $gohanmonoId,
@@ -382,10 +413,11 @@ class ProductsTableSeeder extends Seeder
                 'price' => 500,
                 'image_url' => 'https://placehold.co/400x300/E0E0E0/000000?text=Aburi+Chashu+Don',
                 'is_limited' => true,
-                'limited_location' => $karasumaShichijoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $karasumaShichijoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => false, // 配達不可
             ],
-            // ドリンク（共通商品）
+            // ドリンク
             [
                 'category_id' => $beerId,
                 'name' => '生ビール（中ジョッキ）',
@@ -395,6 +427,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $ochaId,
@@ -405,6 +438,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $tansanInryoId,
@@ -415,6 +449,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $juiceId,
@@ -425,6 +460,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $nihonshuId,
@@ -435,6 +471,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $sourChuhaiId,
@@ -445,6 +482,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $ochaId,
@@ -455,8 +493,9 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
-            // ★限定ドリンクにも is_limited => true と limited_location を正式な店舗名で設定★
+            // 限定ドリンク
             [
                 'category_id' => $ochaId,
                 'name' => '特選ほうじ茶',
@@ -464,8 +503,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 250,
                 'image_url' => null,
                 'is_limited' => true,
-                'limited_location' => $shibataShopName, // ★正式な店舗名を使用★
+                'limited_location' => $shibataShopName,
                 'limited_type' => 'location',
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $tansanInryoId,
@@ -474,8 +514,9 @@ class ProductsTableSeeder extends Seeder
                 'price' => 350,
                 'image_url' => null,
                 'is_limited' => true,
-                'limited_location' => $kawaShijoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $kawaShijoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $otherSoftDrinkId,
@@ -484,11 +525,12 @@ class ProductsTableSeeder extends Seeder
                 'price' => 380,
                 'image_url' => null,
                 'is_limited' => true,
-                'limited_location' => $karasumaShichijoShopName, // ★正式な店舗名を使用★
+                'limited_location' => $karasumaShichijoShopName,
                 'limited_type' => 'location',
+                'is_delivery' => false, // 配達不可
             ],
 
-            // トッピング（共通商品）
+            // トッピング
             [
                 'category_id' => $toppingCategoryId,
                 'name' => '替え玉',
@@ -498,6 +540,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $toppingCategoryId,
@@ -508,6 +551,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $toppingCategoryId,
@@ -518,6 +562,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $toppingCategoryId,
@@ -528,6 +573,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
             [
                 'category_id' => $toppingCategoryId,
@@ -538,6 +584,7 @@ class ProductsTableSeeder extends Seeder
                 'is_limited' => false,
                 'limited_location' => null,
                 'limited_type' => null,
+                'is_delivery' => false, // 配達不可
             ],
         ];
 

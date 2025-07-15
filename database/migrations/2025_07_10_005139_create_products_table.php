@@ -21,11 +21,11 @@ return new class extends Migration
             $table->integer('price');
             // 商品画像
             $table->string('image_url', 255)->nullable();
+            $table->boolean('is_delivery')->default(true);
             // カテゴリID (categoriesテーブルへの外部キー)
             $table->foreignId('category_id')
                   ->constrained() // categoriesテーブルのidを参照 (規約based)
                   ->onDelete('cascade'); // カテゴリが削除されたら商品も削除
-
             $table->timestamps();
         });
     }
