@@ -10,36 +10,76 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Shop;
-use Illuminate\Support\Facades\Log; // Logファサードを追加
-use Carbon\Carbon; // Carbonライブラリをuse
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Config; // Configファサードを追加
 
 class OrderController extends Controller
 {
+    // chooseShopForProduct, confirmShopAndAddToCart メソッドは、
+    // 現在のフローでは直接使われない可能性が高いですが、
+    // ここでは変更せずに残しておきます。
+    // 必要に応じて後で削除またはリファクタリングを検討してください。
+
     /**
-     * 注文確認ページを表示する
+     * 注文情報入力ページを表示 (旧 checkout メソッド)
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function checkout(Request $request)
+    public function create(Request $request) // メソッド名を create に変更
     {
         $cart = Session::get('cart', []);
+        // CartController@add で cart_shop_id がセットされることを想定
         $cartShopId = Session::get('cart_shop_id');
 
         if (empty($cart) || !$cartShopId) {
             return redirect()->route('cart.index')->with('error', 'カートに商品がありません。');
         }
 
-        $cartItems = [];
-        $totalPrice = 0;
+        $items = collect($cart)->map(function ($quantity, $productId) { // $quantity と $productId の順序を修正
+            $product = Product::with('shops')->find($productId);
+            if ($product) {
+                return [
+                    'product_id' => $productId,
+                    'quantity' => $quantity,
+                    'product' => $product,
+                    'shop_name' => $product->shops->first()->name ?? '不明な店舗',
+                    'subtotal' => $product->price * $quantity,
+                    'shop_id' => $product->shops->first()->id ?? null, // shop_idも追加
+                ];
+            }
+            return null;
+        })->filter()->values(); // nullを除外してインデックスをリセット
 
-        $productIds = array_keys($cart);
-        $products = Product::whereIn('id', $productIds)->get();
+        // カート内の商品が全て同じ店舗からのものか最終確認
+        $shopIdsInCart = $items->pluck('shop_id')->unique();
+        if ($shopIdsInCart->count() > 1) {
+            return redirect()->route('cart.index')->with('error', 'カートには複数の店舗の商品が含まれています。注文を完了するには、いずれかの店舗の商品を削除してください。');
+        }
+        if ($shopIdsInCart->first() != $cartShopId) {
+             // セッションのcart_shop_idと実際のカート内容が異なる場合の処理
+             Session::forget('cart');
+             Session::forget('cart_shop_id');
+             return redirect()->route('cart.index')->with('error', 'カート情報が不正です。カートをクリアしました。');
+        }
 
-        // ★★★ここを修正します★★★
-        // selectRawは不要になります
+
+        // カート内の商品が全て配達可能か最終確認
+        $hasUndeliverableItem = $items->contains(function ($item) {
+            return !$item['product']->is_delivery;
+        });
+
+        if ($hasUndeliverableItem) {
+            return redirect()->route('cart.index')->with('error', 'カートには配達対象外の商品が含まれています。店舗受け取りをご希望の場合は、カートを調整してください。');
+        }
+
+        $totalPrice = $items->sum('subtotal');
+        $deliveryFee = 500; // 仮の配送料
+        $grandTotal = $totalPrice + $deliveryFee;
+
+        // 注文する店舗の情報を取得
         $shop = Shop::find($cartShopId);
-        // ★★★修正ここまで★★★
 
         if (!$shop) {
             Session::forget('cart');
@@ -47,30 +87,37 @@ class OrderController extends Controller
             return redirect()->route('cart.index')->with('error', 'カートに紐づく店舗が見つかりませんでした。カートをクリアしました。');
         }
 
-        foreach ($products as $product) {
-            $quantity = $cart[$product->id];
-            $subtotal = $product->price * $quantity;
-            $totalPrice += $subtotal;
+        // 認証済みユーザーのデフォルト住所と電話番号を取得
+        $user = Auth::user();
+        $defaultAddress = $user->address ?? '';
+        $defaultPhoneNumber = $user->phone_number ?? '';
 
-            $cartItems[] = [
-                'product' => $product,
-                'quantity' => $quantity,
-                'subtotal' => $subtotal,
-            ];
-        }
+        // configファイルから配達エリアと時間帯オプションを取得
+        $deliveryZones = Config::get('delivery.delivery_zones');
+        $deliveryTimeOptions = Config::get('delivery.delivery_time_slots');
+        $paymentMethodOptions = [ // 支払い方法のオプションはBladeで直接定義されているため、ここでは不要だが、もしコントローラーで定義するなら含める
+            'cash' => '現金払い',
+            'credit_card' => 'クレジットカード',
+        ];
+        $mapsApiKey = env('Maps_API_KEY');
 
-        $deliveryZones = config('delivery.delivery_zones');
-
+        // 予測配達時間の初期値 (JavaScriptで計算されるため、ここではnullで渡す)
         $estimatedDeliveryTimeMinutes = null;
-        // $shop->lat と $shop->lon が直接プロパティとして取得できるようになる
-        if (!empty($deliveryZones) && $shop->lat && $shop->lon) {
-            $firstZone = reset($deliveryZones);
-            $estimatedDeliveryTimeMinutes = $this->calculateEstimatedDeliveryTime(
-                $shop->lat, $shop->lon,
-                $firstZone['latitude'], $firstZone['longitude']
-            );
-        }
-        return view('orders.index', compact('cartItems', 'totalPrice', 'shop', 'deliveryZones', 'estimatedDeliveryTimeMinutes'));
+
+        return view('orders.create', compact(
+            'items', // $cartItems ではなく $items を使用
+            'shop',
+            'totalPrice',
+            'deliveryFee',
+            'grandTotal',
+            'defaultAddress',
+            'defaultPhoneNumber',
+            'deliveryTimeOptions',
+            'paymentMethodOptions',
+            'deliveryZones',
+            'mapsApiKey',
+            'estimatedDeliveryTimeMinutes'
+        ));
     }
 
     /**
@@ -81,10 +128,14 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        // バリデーション
         $request->validate([
             'delivery_address' => 'required|string|max:255',
-            'delivery_notes' => 'nullable|string|max:500',
+            'delivery_phone' => 'required|string|max:20', // 追加
+            'delivery_notes' => 'nullable|string|max:1000', // maxを500から1000に修正
             'delivery_zone_name' => 'required|string|in:' . implode(',', array_keys(config('delivery.delivery_zones'))),
+            'desired_delivery_time_slot' => 'nullable|string|in:' . implode(',', array_keys(config('delivery.delivery_time_slots'))), // 追加
+            'payment_method' => 'required|string|in:cash,credit_card', // 追加
         ]);
 
         $cart = Session::get('cart', []);
@@ -109,27 +160,14 @@ class OrderController extends Controller
             }
         }
 
-        // ★★★ここも修正します★★★
-        // selectRawは不要になります
-        $shop = Shop::find($cartShopId);
-        // ★★★修正ここまで★★★
-        
+        $shop = Shop::find($cartShopId); // shop_idはcartShopIdから取得済み
+
         if (!$shop) {
             return redirect()->route('cart.index')->with('error', '注文店舗が見つかりませんでした。');
         }
 
-        $selectedDeliveryZoneName = $request->input('delivery_zone_name');
-        $deliveryZones = config('delivery.delivery_zones');
-        $selectedZoneCoords = $deliveryZones[$selectedDeliveryZoneName] ?? null;
-
-        $estimatedDeliveryTimeMinutes = null;
-        // $shop->lat と $shop->lon が直接プロパティとして取得できるようになる
-        if ($selectedZoneCoords && $shop->lat && $shop->lon) {
-            $estimatedDeliveryTimeMinutes = $this->calculateEstimatedDeliveryTime(
-                $shop->lat, $shop->lon,
-                $selectedZoneCoords['latitude'], $selectedZoneCoords['longitude']
-            );
-        }
+        $deliveryFee = 500; // 仮の配送料
+        $grandTotal = $totalPrice + $deliveryFee;
 
         DB::beginTransaction();
 
@@ -137,12 +175,18 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'shop_id' => $cartShopId,
-                'total_amount' => $totalPrice,
                 'delivery_address' => $request->input('delivery_address'),
+                'delivery_phone' => $request->input('delivery_phone'), // 追加
+                'delivery_zone_name' => $request->input('delivery_zone_name'),
+                'desired_delivery_time_slot' => $request->input('desired_delivery_time_slot'), // 追加
                 'delivery_notes' => $request->input('delivery_notes'),
+                'total_price' => $totalPrice, // total_amount から total_price に修正
+                'delivery_fee' => $deliveryFee, // 追加
+                'grand_total' => $grandTotal, // 追加
+                'payment_method' => $request->input('payment_method'), // 追加
                 'status' => 'pending',
-                'delivery_zone_name' => $selectedDeliveryZoneName,
-                'estimated_delivery_time_minutes' => $estimatedDeliveryTimeMinutes,
+                // 'estimated_delivery_time_minutes' はDBにカラムがないため、ここでは保存しない
+                // もし保存したい場合は、別途マイグレーションでカラムを追加してください。
             ]);
 
             foreach ($cart as $productId => $quantity) {
@@ -150,12 +194,13 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $productId,
                     'quantity' => $quantity,
-                    'unit_price' => $products[$productId]->price,
+                    'price' => $products[$productId]->price, // unit_price から price に修正
+                    'subtotal' => $products[$productId]->price * $quantity, // 小計も保存
                 ]);
             }
 
             Session::forget('cart');
-            Session::forget('cart_shop_id');
+            Session::forget('cart_shop_id'); // cart_shop_idもクリア
 
             DB::commit();
 
@@ -163,8 +208,8 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Order creation failed: ' . $e->getMessage());
-            return redirect()->route('cart.index')->with('error', '注文処理中にエラーが発生しました。もう一度お試しください。');
+            Log::error('Order creation failed: ' . $e->getMessage(), ['exception' => $e]);
+            return redirect()->back()->with('error', '注文処理中にエラーが発生しました。もう一度お試しください。');
         }
     }
 
@@ -204,14 +249,28 @@ class OrderController extends Controller
         // ピーク時間帯の判定と加算
         $now = Carbon::now();
         foreach ($peakHours as $period) {
-            list($start, $end) = explode('-', $period);
-            $startTime = Carbon::parse($start);
-            $endTime = Carbon::parse($end);
+            // config/delivery.php の peak_hours の形式が 'HH:MM-HH:MM' なので、それを考慮
+            list($startStr, $endStr) = explode('-', $period);
+            $startTime = Carbon::parse($startStr);
+            $endTime = Carbon::parse($endStr);
 
             // 日付を考慮せず時間帯のみで判定
-            if ($now->between($startTime, $endTime, true)) {
-                $estimatedTime += $peakSurcharge;
-                break; // 複数のピーク時間帯に重なる場合は最初のものだけ適用
+            // Carbonのbetweenメソッドは日付も考慮するため、時間帯のみで判定するには工夫が必要
+            // ここでは、現在時刻の時分がピーク時間帯の時分に含まれるかをチェック
+            $currentMinutes = $now->hour * 60 + $now->minute;
+            $startMinutes = $startTime->hour * 60 + $startTime->minute;
+            $endMinutes = $endTime->hour * 60 + $endTime->minute;
+
+            if ($startMinutes < $endMinutes) { // 通常のピーク時間帯 (例: 18:00-20:00)
+                if ($currentMinutes >= $startMinutes && $currentMinutes < $endMinutes) {
+                    $estimatedTime += $peakSurcharge;
+                    break;
+                }
+            } else { // 日付をまたぐピーク時間帯 (例: 23:00-01:00)
+                if ($currentMinutes >= $startMinutes || $currentMinutes < $endMinutes) {
+                    $estimatedTime += $peakSurcharge;
+                    break;
+                }
             }
         }
 
