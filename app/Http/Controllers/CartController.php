@@ -64,15 +64,56 @@ class CartController extends Controller
      */
     public function create(Request $request)
     {
-       $selectedShopId = $request->input('shop_id');
+        $latitude = (float)$request->query('lat');
+        $longitude = (float)$request->query('lon');
+        $radiusKm = 20; // 検索半径（km）
+
+        $nearbyShops = collect(); // 初期化
+        $message = '位置情報を許可すると、お近くの店舗が表示されます。';
+
+         $shops = Shop::all();
+
+        // 位置情報がURLパラメータにある場合、近隣店舗を検索
+        if ($latitude && $longitude) {
+            $userLat = $latitude;
+            $userLon = $longitude;
+
+            $filteredShops = collect();
+
+            foreach ($shops as $shop) {
+                $shopLat = (float)$shop->lat;
+                $shopLon = (float)$shop->lon;
+
+                // 簡易的な距離計算 (Haversine formulaの簡略版)
+                $theta = $userLon - $shopLon;
+                $dist = sin(deg2rad($userLat)) * sin(deg2rad($shopLat)) + cos(deg2rad($userLat)) * cos(deg2rad($shopLat)) * cos(deg2rad($theta));
+                $dist = acos($dist);
+                $dist = rad2deg($dist);
+                $meters = $dist * 60 * 1.1515 * 1609.344; // マイルをメートルに変換
+
+                $shop->distance = $meters;
+                if ($shop->distance <= $radiusKm * 1000) { // 半径（m）でフィルタリング
+                    $filteredShops->push($shop);
+                }
+            }
+
+            $nearbyShops = $filteredShops->sortBy('distance')->values();
+
+            if ($nearbyShops->isNotEmpty()) {
+                $message = '現在地から' . $radiusKm . 'km圏内に店舗が見つかりました。';
+            } else {
+                $message = '現在地から' . $radiusKm . 'km圏内に店舗は見つかりませんでした。';
+            }
+        } else {
+            $message = '位置情報を許可すると、お近くの店舗が表示されます。';
+        }
+
+        // ユーザーが店舗を選択した場合
+        $selectedShopId = $request->query('shop_id');
         $selectedShop = null;
         $deliverableProducts = collect(); // 空のコレクションで初期化
 
-        // 全ての店舗を取得
-        $shops = Shop::all();
-
         if ($selectedShopId) {
-            // 店舗が選択された場合
             $selectedShop = Shop::find($selectedShopId);
 
             if ($selectedShop) {
@@ -85,8 +126,10 @@ class CartController extends Controller
             }
         }
 
+        $mapsApiKey = env('Maps_API_KEY'); // Google Maps API Keyを取得
+
         // ビューに渡す変数
-        return view('cart.add', compact('shops', 'selectedShop', 'deliverableProducts'));
+        return view('cart.add', compact('shops', 'nearbyShops', 'message', 'latitude', 'longitude', 'selectedShop', 'deliverableProducts', 'mapsApiKey'));
     }
 
     /**
@@ -180,6 +223,7 @@ class CartController extends Controller
             return redirect()->back()->with('error', Session::get('error', '商品を追加できませんでした。'));
         }
     }
+
 
     /**
      * カート内の商品の数量を更新
