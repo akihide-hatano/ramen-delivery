@@ -142,13 +142,131 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-
-    // ★★★ ここにddを追加 ★★★
-    dd($request->all()); // フォームから送信された全てのデータを確認
-    // dd($request->validate([...])); // バリデーションが成功した場合は、バリデーションされたデータが表示される
-    // dd($errors); // バリデーションエラーがある場合、エラーオブジェクトが表示される
-    // ★★★ ここまで追加 ★★★
         // バリデーション
+        // $request->validate([
+        //     'delivery_address' => 'required|string|max:255',
+        //     'delivery_phone' => 'required|string|max:20',
+        //     'delivery_notes' => 'nullable|string|max:1000',
+        //     'delivery_zone_name' => 'required|string|in:' . implode(',', array_keys(config('delivery.delivery_zones'))),
+        //     'desired_delivery_time_slot' => 'nullable|string|in:' . implode(',', array_keys(config('delivery.delivery_time_slots'))),
+        //     'payment_method' => 'required|string|in:cash,credit_card',
+        // ]);
+
+        // $cart = Session::get('cart', []);
+        // $cartShopId = Session::get('cartShopId'); // ★ここを 'cartShopId' に統一
+
+            // ★★★ ここにddを追加して、セッションの状態を確認 ★★★
+    // dd([
+    //     'location' => 'OrderController@store - after validation, checking session',
+    //     'request_data' => $request->all(), // 送信データ
+    //     'session_cart' => Session::get('cart'), // カートの中身
+    //     'session_cartShopId' => Session::get('cartShopId'), // カートショップID
+    //     'session_all' => Session::all(), // セッション全体
+    //     'is_cart_empty' => empty(Session::get('cart')),
+    //     'is_cartShopId_null' => !Session::get('cartShopId'),
+    // ]);
+    // ★★★ ここまで追加 ★★★
+
+        // if (empty($cart) || !$cartShopId) {
+        //     return redirect()->route('cart.index')->with('error', 'カートに商品がありません。');
+        // }
+
+        // $totalPrice = 0;
+        // $productIds = array_keys($cart);
+        // $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+        // foreach ($cart as $productId => $quantity) {
+        //     if (isset($products[$productId])) {
+        //         $product = $products[$productId];
+        //         $totalPrice += $product->price * $quantity;
+        //     } else {
+        //         Session::forget('cart');
+        //         Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
+        //         return redirect()->route('cart.index')->with('error', 'カートに含まれる商品の一部が見つかりませんでした。カートをクリアしました。');
+        //     }
+        // }
+
+        // foreach ($cart as $itemData) { // $itemData は ['product_id' => X, 'quantity' => Y, 'shop_id' => Z] の形式
+        //     $productId = $itemData['product_id'];
+        //     $quantity = $itemData['quantity'];
+
+            // $product = Product::find($productId); // ループ内で個別に商品を取得
+
+        //     if (!$product) { // 商品が見つからない場合
+        //         Session::forget('cart');
+        //         Session::forget('cartShopId');
+        //         return redirect()->route('cart.index')->with('error', 'カートに含まれる商品の一部が見つかりませんでした。カートをクリアしました。');
+        //     }
+        //     $totalPrice += $product->price * $quantity;
+        // }
+
+        // $shop = Shop::find($cartShopId);
+
+        // if (!$shop) {
+        //     return redirect()->route('cart.index')->with('error', '注文店舗が見つかりませんでした。');
+        // }
+
+        // $deliveryFee = 500;
+        // $grandTotal = $totalPrice + $deliveryFee;
+
+        // DB::beginTransaction();
+
+        // try {
+        //     $order = Order::create([
+        //         'user_id' => Auth::id(),
+        //         'shop_id' => $cartShopId,
+        //         'delivery_address' => $request->input('delivery_address'),
+        //         'delivery_phone' => $request->input('delivery_phone'),
+        //         'delivery_zone_name' => $request->input('delivery_zone_name'),
+        //         'desired_delivery_time_slot' => $request->input('desired_delivery_time_slot'),
+        //         'delivery_notes' => $request->input('delivery_notes'),
+        //         'total_price' => $totalPrice,
+        //         'delivery_fee' => $deliveryFee,
+        //         'grand_total' => $grandTotal,
+        //         'payment_method' => $request->input('payment_method'),
+        //         'status' => 'pending',
+        //     ]);
+
+            // foreach ($cart as $productId => $quantity) {
+            //     OrderItem::create([
+            //         'order_id' => $order->id,
+            //         'product_id' => $productId,
+            //         'quantity' => $quantity,
+            //         'price' => $products[$productId]->price,
+            //         'subtotal' => $products[$productId]->price * $quantity,
+            //     ]);
+            // }
+        //     foreach ($cart as $itemData) { // ★ここも修正
+        //     $productId = $itemData['product_id'];
+        //     $quantity = $itemData['quantity'];
+        //     $product = Product::find($productId);
+
+        //     OrderItem::create([
+        //         'order_id' => $order->id,
+        //         'product_id' => $productId,
+        //         'quantity' => $quantity,
+        //         'price' => $product->price,
+        //         'subtotal' => $product->price * $quantity,
+        //     ]);
+        // }
+
+        //     Session::forget('cart');
+        //     Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
+
+        //     DB::commit();
+
+        //     return redirect()->route('orders.complete')->with('success', 'ご注文が完了しました！');
+
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     Log::error('Order creation failed: ' . $e->getMessage(), ['exception' => $e]);
+        //     return redirect()->back()->with('error', '注文処理中にエラーが発生しました。もう一度お試しください。');
+        // }
+
+           Log::info('OrderController@store: Request received.', $request->all());
+
+    // バリデーション
+    try {
         $request->validate([
             'delivery_address' => 'required|string|max:255',
             'delivery_phone' => 'required|string|max:20',
@@ -157,78 +275,98 @@ class OrderController extends Controller
             'desired_delivery_time_slot' => 'nullable|string|in:' . implode(',', array_keys(config('delivery.delivery_time_slots'))),
             'payment_method' => 'required|string|in:cash,credit_card',
         ]);
+        Log::info('OrderController@store: Validation successful.');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('OrderController@store: Validation failed.', ['errors' => $e->errors()]);
+        return redirect()->back()->withErrors($e->errors())->withInput();
+    }
 
-        $cart = Session::get('cart', []);
-        $cartShopId = Session::get('cartShopId'); // ★ここを 'cartShopId' に統一
 
-        if (empty($cart) || !$cartShopId) {
-            return redirect()->route('cart.index')->with('error', 'カートに商品がありません。');
-        }
+    $cart = Session::get('cart', []);
+    $cartShopId = Session::get('cartShopId');
+    Log::info('OrderController@store: Session cart data.', ['cart' => $cart, 'cartShopId' => $cartShopId]);
 
-        $totalPrice = 0;
-        $productIds = array_keys($cart);
-        $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
-        foreach ($cart as $productId => $quantity) {
-            if (isset($products[$productId])) {
-                $product = $products[$productId];
-                $totalPrice += $product->price * $quantity;
-            } else {
-                Session::forget('cart');
-                Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
-                return redirect()->route('cart.index')->with('error', 'カートに含まれる商品の一部が見つかりませんでした。カートをクリアしました。');
-            }
-        }
+    if (empty($cart) || !$cartShopId) {
+        Log::warning('OrderController@store: Cart is empty or shop ID is missing. Redirecting to cart index.');
+        return redirect()->route('cart.index')->with('error', 'カートに商品がありません。');
+    }
 
-        $shop = Shop::find($cartShopId);
+    $totalPrice = 0;
+    foreach ($cart as $itemData) {
+        $productId = $itemData['product_id'];
+        $quantity = $itemData['quantity'];
+        $product = Product::find($productId);
 
-        if (!$shop) {
-            return redirect()->route('cart.index')->with('error', '注文店舗が見つかりませんでした。');
-        }
-
-        $deliveryFee = 500;
-        $grandTotal = $totalPrice + $deliveryFee;
-
-        DB::beginTransaction();
-
-        try {
-            $order = Order::create([
-                'user_id' => Auth::id(),
-                'shop_id' => $cartShopId,
-                'delivery_address' => $request->input('delivery_address'),
-                'delivery_phone' => $request->input('delivery_phone'),
-                'delivery_zone_name' => $request->input('delivery_zone_name'),
-                'desired_delivery_time_slot' => $request->input('desired_delivery_time_slot'),
-                'delivery_notes' => $request->input('delivery_notes'),
-                'total_price' => $totalPrice,
-                'delivery_fee' => $deliveryFee,
-                'grand_total' => $grandTotal,
-                'payment_method' => $request->input('payment_method'),
-                'status' => 'pending',
-            ]);
-
-            foreach ($cart as $productId => $quantity) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $productId,
-                    'quantity' => $quantity,
-                    'price' => $products[$productId]->price,
-                    'subtotal' => $products[$productId]->price * $quantity,
-                ]);
-            }
-
+        if (!$product) {
+            Log::error('OrderController@store: Product not found in cart loop.', ['productId' => $productId]);
             Session::forget('cart');
-            Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
-
-            DB::commit();
-
-            return redirect()->route('orders.complete')->with('success', 'ご注文が完了しました！');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Order creation failed: ' . $e->getMessage(), ['exception' => $e]);
-            return redirect()->back()->with('error', '注文処理中にエラーが発生しました。もう一度お試しください。');
+            Session::forget('cartShopId');
+            return redirect()->route('cart.index')->with('error', 'カートに含まれる商品の一部が見つかりませんでした。カートをクリアしました。');
         }
+        $totalPrice += $product->price * $quantity;
+    }
+    Log::info('OrderController@store: Total price calculated.', ['totalPrice' => $totalPrice]);
+
+
+    $shop = Shop::find($cartShopId);
+    if (!$shop) {
+        Log::error('OrderController@store: Shop not found.', ['cartShopId' => $cartShopId]);
+        return redirect()->route('cart.index')->with('error', '注文店舗が見つかりませんでした。');
+    }
+    Log::info('OrderController@store: Shop found.', ['shopName' => $shop->name]);
+
+
+    $deliveryFee = 500;
+    $grandTotal = $totalPrice + $deliveryFee;
+    Log::info('OrderController@store: Grand total calculated.', ['grandTotal' => $grandTotal]);
+
+
+    DB::beginTransaction();
+    try {
+        $order = Order::create([
+            'user_id' => Auth::id(),
+            'shop_id' => $cartShopId,
+            'delivery_address' => $request->input('delivery_address'),
+            'delivery_phone' => $request->input('delivery_phone'),
+            'delivery_zone_name' => $request->input('delivery_zone_name'),
+            'desired_delivery_time_slot' => $request->input('desired_delivery_time_slot'),
+            'delivery_notes' => $request->input('delivery_notes'),
+            'total_price' => $totalPrice,
+            'delivery_fee' => $deliveryFee,
+            'grand_total' => $grandTotal,
+            'payment_method' => $request->input('payment_method'),
+            'status' => 'pending',
+        ]);
+        Log::info('OrderController@store: Order created.', ['orderId' => $order->id]);
+
+
+        foreach ($cart as $itemData) {
+            $productId = $itemData['product_id'];
+            $quantity = $itemData['quantity'];
+            $product = Product::find($productId); // ここで再度取得
+
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $productId,
+                'quantity' => $quantity,
+                'unit_price' => $product->price,
+                'subtotal' => $product->price * $quantity,
+            ]);
+            Log::info('OrderController@store: Order item created.', ['productId' => $productId, 'quantity' => $quantity]);
+        }
+
+        Session::forget('cart');
+        Session::forget('cartShopId');
+        DB::commit();
+        Log::info('OrderController@store: Order committed. Redirecting to complete page.');
+        return redirect()->route('orders.complete')->with('success', 'ご注文が完了しました！');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Order creation failed: ' . $e->getMessage(), ['exception' => $e, 'trace' => $e->getTraceAsString()]);
+        return redirect()->back()->with('error', '注文処理中にエラーが発生しました。もう一度お試しください。');
+    }
     }
 
     /**
