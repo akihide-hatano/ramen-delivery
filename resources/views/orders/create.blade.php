@@ -102,6 +102,25 @@
                             @enderror
                         </div>
 
+                                                {{-- ★★★ ここに支払い方法選択のドロップダウンを追加 ★★★ --}}
+                        <div class="mb-4">
+                            <label for="payment_method" class="block text-gray-700 text-sm font-bold mb-2">
+                                支払い方法:
+                            </label>
+                            <select name="payment_method" id="payment_method"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                required>
+                                <option value="">選択してください</option>
+                                @foreach ($paymentMethodOptions as $key => $display)
+                                    <option value="{{ $key }}">{{ $display }}</option>
+                                @endforeach
+                            </select>
+                            @error('payment_method')
+                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        {{-- ★★★ 追加ここまで ★★★ --}}
+
                         <div class="mb-4">
                             <label for="delivery_address" class="block text-gray-700 text-sm font-bold mb-2">
                                 詳細住所:
