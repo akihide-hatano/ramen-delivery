@@ -130,7 +130,7 @@
                                                 <div class="flex items-center mt-auto">
                                                     <label for="quantity_{{ $product->id }}" class="mr-2 text-sm text-gray-700">数量:</label>
                                                     <input type="number" name="items[{{ $product->id }}][quantity]" id="quantity_{{ $product->id }}"
-                                                           value="1" min="1"
+                                                           value="0" min="0"
                                                            class="w-20 text-center rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
                                                 </div>
                                             </div>
@@ -160,7 +160,6 @@
             </div>
         </div>
     </div>
-    
     {{-- ★ここから追加するJavaScriptコード★ --}}
     @push('scripts')
     <script>
