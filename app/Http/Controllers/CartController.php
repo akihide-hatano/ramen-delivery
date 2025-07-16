@@ -48,8 +48,9 @@ class CartController extends Controller
         if ($hasUndeliverableItem && !$allDeliverable) {
             $warningMessage = 'カートには配達できない商品が含まれています。配達注文を行う場合は、これらの商品を削除するか、店舗受け取りをご利用ください。';
         } elseif ($hasUndeliverableItem && $items->count() > 0 && $allDeliverable) {
-            // カート内の全商品が配達不可の場合
-             $warningMessage = 'カート内の商品は全て配達対象外です。店舗受け取りのみ可能です。';
+            // カート内の全商品が配達不可の場合 (修正: この条件は、$allDeliverableがfalseの場合にのみ発動するべき)
+            // 正しいロジック: 全てが配達不可であれば、$allDeliverableはfalseになる
+            $warningMessage = 'カート内の商品は全て配達対象外です。店舗受け取りのみ可能です。';
         }
 
 
@@ -68,13 +69,10 @@ class CartController extends Controller
         $longitude = (float)$request->query('lon');
         $radiusKm = 20; // 検索半径（km）
 
-                // ★★★ここでdd()を追加★★★
-        // dd("Lat: " . $latitude, "Lon: " . $longitude);
-
         $nearbyShops = collect(); // 初期化
         $message = '位置情報を許可すると、お近くの店舗が表示されます。';
 
-         $shops = Shop::all();
+        $shops = Shop::all();
 
         // 位置情報がURLパラメータにある場合、近隣店舗を検索
         if ($latitude && $longitude) {
@@ -163,9 +161,7 @@ class CartController extends Controller
             // カート内の商品が紐づく店舗と、今追加しようとしている店舗が異なるか
             if ($firstCartItem['shop_id'] != $selectedShopIdForCart) {
                 // カート内の商品と選択された店舗が異なる場合、クリア確認ページへリダイレクト
-                // ここでのロジックは、以前の単一商品追加時のものに近い形に戻します。
-                // ユーザーに「カートをクリアして新しい店舗の商品を追加するか」を問う。
-                Session::flash('previous_add_product_id', array_keys($itemsToAdd)[0] ?? null); // 最初の商品のIDを渡す
+                Session::flash('previous_add_product_id', array_keys($itemsToAdd)[0] ?? null);
                 Session::flash('previous_add_shop_id', $selectedShopIdForCart);
                 Session::flash('previous_add_quantity', array_values($itemsToAdd)[0]['quantity'] ?? 1);
                 return redirect()->route('cart.confirm-clear');
@@ -220,6 +216,19 @@ class CartController extends Controller
 
         Session::put('cart', $cart);
 
+        // ★★★ここから追加/修正★★★
+        // カートに商品が追加された（または更新された）場合、cartShopIdをセッションに保存
+        // カート内の商品はすべて同じshop_idを持つはずなので、最初の商品のshop_idを保存
+        if (!empty($cart)) {
+            $firstCartItem = reset($cart);
+            Session::put('cartShopId', $firstCartItem['shop_id']);
+        } else {
+            // カートが空になった場合は、cartShopIdもクリアする（念のため）
+            Session::forget('cartShopId');
+        }
+        // ★★★ここまで追加/修正★★★
+
+
         if ($successCount > 0) {
             return redirect()->route('cart.index')->with('success', "{$successCount}件の商品をカートに追加しました。");
         } else {
@@ -247,23 +256,41 @@ class CartController extends Controller
         $quantity = $request->input('quantity');
 
         $cart = Session::get('cart', []);
+        $updated = false; // 更新が実際に行われたかを示すフラグ
 
         foreach ($cart as $key => $item) {
             if ($item['product_id'] == $productId && $item['shop_id'] == $shopId) { // shop_idも比較条件に含める
                 if ($quantity > 0) {
                     $cart[$key]['quantity'] = $quantity;
-                    Session::put('cart', $cart);
-                    return redirect()->route('cart.index')->with('success', 'カート数量を更新しました。');
+                    $updated = true;
                 } else {
                     // 数量が0なら削除
                     unset($cart[$key]);
-                    Session::put('cart', $cart);
-                    return redirect()->route('cart.index')->with('success', '商品をカートから削除しました。');
+                    $updated = true;
                 }
+                break; // 見つかったらループを抜ける
             }
         }
 
-        return redirect()->route('cart.index')->with('error', 'カート内の商品が見つかりませんでした。');
+        Session::put('cart', $cart);
+
+        // ★★★ここから追加/修正★★★
+        // カートが更新された場合、cartShopIdをセッションに保存
+        // カート内の商品はすべて同じshop_idを持つはずなので、最初の商品のshop_idを保存
+        if (!empty($cart)) {
+            $firstCartItem = reset($cart);
+            Session::put('cartShopId', $firstCartItem['shop_id']);
+        } else {
+            // カートが空になった場合は、cartShopIdもクリアする
+            Session::forget('cartShopId');
+        }
+        // ★★★ここまで追加/修正★★★
+
+        if ($updated) {
+            return redirect()->route('cart.index')->with('success', 'カート数量を更新しました。');
+        } else {
+            return redirect()->route('cart.index')->with('error', 'カート内の商品が見つかりませんでした。');
+        }
     }
 
     /**
@@ -283,16 +310,34 @@ class CartController extends Controller
         $shopId = $request->input('shop_id'); // shop_idを取得
 
         $cart = Session::get('cart', []);
+        $removed = false; // 削除が実際に行われたかを示すフラグ
 
         foreach ($cart as $key => $item) {
             if ($item['product_id'] == $productId && $item['shop_id'] == $shopId) { // shop_idも比較条件に含める
                 unset($cart[$key]);
-                Session::put('cart', $cart);
-                return redirect()->route('cart.index')->with('success', '商品をカートから削除しました。');
+                $removed = true;
+                break; // 見つかったらループを抜ける
             }
         }
 
-        return redirect()->route('cart.index')->with('error', 'カート内の商品が見つかりませんでした。');
+        Session::put('cart', $cart);
+
+        // ★★★ここから追加/修正★★★
+        // カートから商品が削除された後、cartShopIdを再評価
+        if (!empty($cart)) {
+            $firstCartItem = reset($cart);
+            Session::put('cartShopId', $firstCartItem['shop_id']);
+        } else {
+            // カートが空になった場合は、cartShopIdもクリアする
+            Session::forget('cartShopId');
+        }
+        // ★★★ここまで追加/修正★★★
+
+        if ($removed) {
+            return redirect()->route('cart.index')->with('success', '商品をカートから削除しました。');
+        } else {
+            return redirect()->route('cart.index')->with('error', 'カート内の商品が見つかりませんでした。');
+        }
     }
 
     /**
@@ -303,6 +348,9 @@ class CartController extends Controller
     public function clear()
     {
         Session::forget('cart');
+        // ★★★ここから追加★★★
+        Session::forget('cartShopId'); // カートがクリアされたらショップIDもクリア
+        // ★★★ここまで追加★★★
         return redirect()->route('cart.index')->with('success', 'カートが空になりました。');
     }
 

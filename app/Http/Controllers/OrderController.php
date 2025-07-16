@@ -34,6 +34,7 @@ class OrderController extends Controller
         $cartShopId = Session::get('cart_shop_id');
 
         if (empty($cart) || !$cartShopId) {
+            dd('Redirecting: Cart empty or shop ID missing', ['cart' => $cart, 'cartShopId' => $cartShopId, 'session_all' => Session::all()]);
             return redirect()->route('cart.index')->with('error', 'カートに商品がありません。');
         }
 
