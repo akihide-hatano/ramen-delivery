@@ -36,16 +36,22 @@ class OrderController extends Controller
             return redirect()->route('cart.index')->with('error', 'カートに商品がありません。');
         }
 
-        $items = collect($cart)->map(function ($quantity, $productId) {
+        $items = collect($cart)->map(function ($itemData) {
+                $productId = $itemData['product_id']; // ★配列からproduct_idを取得
+                $quantity = $itemData['quantity'];   // ★配列からquantityを取得
+                $itemShopId = $itemData['shop_id'];  // ★配列からshop_idを取得
             $product = Product::with('shops')->find($productId);
             if ($product) {
+            // カートの$itemに保存されているshop_idを使って、その店舗の情報を取得する
+            $shop = $product->shops->firstWhere('id', $itemShopId); // 正しい店舗名表示のため
+
                 return [
                     'product_id' => $productId,
                     'quantity' => $quantity,
                     'product' => $product,
-                    'shop_name' => $product->shops->first()->name ?? '不明な店舗',
+                    'shop_name' => $shop->name ?? '不明な店舗', // 正しい店舗名
                     'subtotal' => $product->price * $quantity,
-                    'shop_id' => $product->shops->first()->id ?? null,
+                    'shop_id' => $itemShopId, // カートに保存されたshop_idをそのまま使用
                 ];
             }
             return null;
@@ -53,14 +59,25 @@ class OrderController extends Controller
 
         // カート内の商品が全て同じ店舗からのものか最終確認
         $shopIdsInCart = $items->pluck('shop_id')->unique();
+    // ★★★ ここにddを追加して、変数の中身を確認する ★★★
+    // dd([
+    //     'location' => 'OrderController@create - before shop consistency check',
+    //     'cart' => $cart, // カートの中身をもう一度確認
+    //     'cartShopId_from_session' => $cartShopId, // セッションから取得したshopId
+    //     'shopIdsInCart_collection' => $shopIdsInCart->toArray(), // カート内の商品のユニークな店舗ID
+    //     'first_shop_id_in_cart' => $shopIdsInCart->first(), // カート内の最初の商品の店舗ID
+    //     'comparison_result' => ($shopIdsInCart->first() != $cartShopId), // この結果がtrueになっているか？
+    //     'shop_find_result' => Shop::find($cartShopId), // $cartShopId で店舗が見つかるか？
+    // ]);
+    // ★★★ ここまで追加 ★★★
         if ($shopIdsInCart->count() > 1) {
             return redirect()->route('cart.index')->with('error', 'カートには複数の店舗の商品が含まれています。注文を完了するには、いずれかの店舗の商品を削除してください。');
         }
         if ($shopIdsInCart->first() != $cartShopId) {
              // セッションのcartShopIdと実際のカート内容が異なる場合の処理
-             Session::forget('cart');
-             Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
-             return redirect()->route('cart.index')->with('error', 'カート情報が不正です。カートをクリアしました。');
+            Session::forget('cart');
+            Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
+            return redirect()->route('cart.index')->with('error', 'カート情報が不正です。カートをクリアしました。');
         }
 
         // カート内の商品が全て配達可能か最終確認
