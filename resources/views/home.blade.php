@@ -14,7 +14,7 @@
                         <p class="text-xl mb-2">麺とスープに</p>
                         <h2 class="text-5xl font-extrabold mb-4">こだわり抜いた<br>幸福の一杯</h2>
                         <p class="text-lg">潮屋が誇る、選び抜かれた素材と熟練の技が織りなす至高のラーメン。</p>
-                        <a href="{{ route('shops.index') }}" class="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-red-700 transition duration-300 shadow-lg">今すぐ注文する</a>
+                        <a id="orderNowButton" href="{{ route('cart.create') }}" class="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-red-700 transition duration-300 shadow-lg">今すぐ注文する</a>
                     </div>
                     <div class="md:w-1/2 flex justify-center p-4">
                         <img src="https://placehold.co/500x350/F0F0F0/000000?text=Main+Ramen" alt="メインラーメン" class="rounded-lg shadow-xl">

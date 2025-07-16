@@ -68,6 +68,9 @@ class CartController extends Controller
         $longitude = (float)$request->query('lon');
         $radiusKm = 20; // 検索半径（km）
 
+                // ★★★ここでdd()を追加★★★
+        // dd("Lat: " . $latitude, "Lon: " . $longitude);
+
         $nearbyShops = collect(); // 初期化
         $message = '位置情報を許可すると、お近くの店舗が表示されます。';
 

@@ -43,7 +43,7 @@
                                             <div>
                                                 <h4 class="text-2xl font-semibold text-gray-800 mb-2">{{ $shop->name }}</h4>
                                                 <p class="text-gray-700 text-sm mb-1">{{ $shop->address }}</p>
-                                                <p class="text-gray-600 text-sm mb-4">
+                                                <p class="text-gray-700 text-sm mb-4">
                                                     営業時間: {{ $shop->business_hours ?? '不明' }}
                                                 </p>
                                                 @if (isset($shop->distance))
@@ -160,59 +160,59 @@
             </div>
         </div>
     </div>
-</x-app-layout>
-
-{{-- 位置情報取得のためのJavaScript --}}
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('cart/add.blade.php JavaScript is running!');
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const lat = urlParams.get('lat');
-    const lon = urlParams.get('lon');
-    const shopId = urlParams.get('shop_id'); // 店舗が既に選択されているか確認
-
-    // 緯度・経度がURLにない、かつ店舗も選択されていない場合に位置情報を取得
-    if ((!lat || !lon) && !shopId) {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                const userLat = position.coords.latitude;
-                const userLon = position.coords.longitude;
-
-                console.log('位置情報を取得しました:', userLat, userLon);
-
-                const newUrl = new URL(window.location.href);
-                newUrl.searchParams.set('lat', userLat);
-                newUrl.searchParams.set('lon', userLon);
-                window.location.href = newUrl.toString(); // URLを更新してページをリロード
-            }, function(error) {
-                console.error('Geolocation position error:', error.message);
-                let errorMessage = '';
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        errorMessage = '位置情報の利用が許可されませんでした。';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage = '位置情報を取得できませんでした。';
-                        break;
-                    case error.TIMEOUT:
-                        errorMessage = '位置情報の取得がタイムアウトしました。';
-                        break;
-                    default:
-                        errorMessage = '不明なエラーが発生しました。';
-                        break;
-                }
-                // エラーメッセージをユーザーに表示する処理をここに追加することもできます
-                console.error('Geolocation error code:', error.code, 'message:', errorMessage);
-            });
-        } else {
-            console.warn('Geolocation is not supported by this browser.');
-            // Geolocationがサポートされていない場合のメッセージ表示
-        }
-    } else {
-        console.log('緯度・経度または店舗がURLに既に存在します。');
-    }
-});
-</script>
+    
+    {{-- ★ここから追加するJavaScriptコード★ --}}
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('cart/add.blade.php JavaScript is running!');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const lat = urlParams.get('lat');
+            const lon = urlParams.get('lon');
+            const shopId = urlParams.get('shop_id'); // 店舗が既に選択されているか確認
+            
+            // 緯度・経度がURLにない、かつ店舗も選択されていない場合に位置情報を取得
+            if ((!lat || !lon) && !shopId) {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const userLat = position.coords.latitude;
+                        const userLon = position.coords.longitude;
+                        
+                        console.log('位置情報を取得しました:', userLat, userLon);
+                        
+                        const newUrl = new URL(window.location.href);
+                        newUrl.searchParams.set('lat', userLat);
+                        newUrl.searchParams.set('lon', userLon);
+                        window.location.href = newUrl.toString(); // URLを更新してページをリロード
+                    }, function(error) {
+                        console.error('Geolocation position error:', error.message);
+                        let errorMessage = '';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = '位置情報の利用が許可されませんでした。';
+                                break;
+                                case error.POSITION_UNAVAILABLE:
+                                    errorMessage = '位置情報を取得できませんでした。';
+                                    break;
+                                    case error.TIMEOUT:
+                                        errorMessage = '位置情報の取得がタイムアウトしました。';
+                                        break;
+                                        default:
+                                            errorMessage = '不明なエラーが発生しました。';
+                                            break;
+                                        }
+                                        // エラーメッセージをユーザーに表示する処理をここに追加することもできます
+                                        console.error('Geolocation error code:', error.code, 'message:', errorMessage);
+                                    });
+                                } else {
+                                    console.warn('Geolocation is not supported by this browser.');
+                                    // Geolocationがサポートされていない場合のメッセージ表示
+                                }
+                            } else {
+                                console.log('緯度・経度または店舗がURLに既に存在します。');
+                            }
+                        });
+                    </script>
 @endpush
+</x-app-layout>
