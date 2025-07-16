@@ -144,7 +144,7 @@ class OrderController extends Controller
     {
 
     // ★★★ ここにddを追加 ★★★
-    // dd($request->all()); // フォームから送信された全てのデータを確認
+    dd($request->all()); // フォームから送信された全てのデータを確認
     // dd($request->validate([...])); // バリデーションが成功した場合は、バリデーションされたデータが表示される
     // dd($errors); // バリデーションエラーがある場合、エラーオブジェクトが表示される
     // ★★★ ここまで追加 ★★★
