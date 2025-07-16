@@ -102,7 +102,7 @@
                             @enderror
                         </div>
 
-                                                {{-- ★★★ ここに支払い方法選択のドロップダウンを追加 ★★★ --}}
+                        {{-- 支払い方法選択のドロップダウン --}}
                         <div class="mb-4">
                             <label for="payment_method" class="block text-gray-700 text-sm font-bold mb-2">
                                 支払い方法:
@@ -119,7 +119,6 @@
                                 <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
                             @enderror
                         </div>
-                        {{-- ★★★ 追加ここまで ★★★ --}}
 
                         <div class="mb-4">
                             <label for="delivery_address" class="block text-gray-700 text-sm font-bold mb-2">
@@ -133,6 +132,21 @@
                                 <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        {{-- ★★★ ここに配達電話番号の入力フィールドを追加 ★★★ --}}
+                        <div class="mb-4">
+                            <label for="delivery_phone" class="block text-gray-700 text-sm font-bold mb-2">
+                                配達先電話番号:
+                            </label>
+                            <input type="text" name="delivery_phone" id="delivery_phone"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                placeholder="例: 09012345678" required
+                                value="{{ Auth::user()->phone_number ?? '' }}"> {{-- ユーザーのデフォルト電話番号があれば表示 --}}
+                            @error('delivery_phone')
+                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        {{-- ★★★ 追加ここまで ★★★ --}}
 
                         <div class="mb-6">
                             <label for="delivery_notes" class="block text-gray-700 text-sm font-bold mb-2">
