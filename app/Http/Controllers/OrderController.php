@@ -27,7 +27,17 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
-    
+public function show(Order $order)
+{
+    // 他のユーザーの注文を見れないようにポリシーやゲートで制限するのがベストですが、
+    // まずはシンプルに、その注文が現在のユーザーのものであるか確認
+    if ($order->user_id !== Auth::id()) {
+        return redirect()->route('orders.index')->with('error', '他のユーザーの注文は閲覧できません。');
+    }
+
+    return view('orders.show', compact('order'));
+}
+
     /**
      * 注文情報入力ページを表示 (旧 checkout メソッド)
      *

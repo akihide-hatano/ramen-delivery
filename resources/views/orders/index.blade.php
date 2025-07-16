@@ -30,7 +30,7 @@
                         <td>¥{{ number_format($order->grand_total) }}</td>
                         <td>{{ $order->status }}</td>
                         <td>{{ $order->created_at->format('Y/m/d H:i') }}</td>
-                        <td><a href="#" class="btn btn-sm btn-info">詳細</a></td>
+                        <td><a href= {{route('orders.show', $order->id)}} class="btn btn-sm btn-info">詳細</a></td>
                     </tr>
                 @endforeach
             </tbody>

@@ -79,6 +79,8 @@ Route::prefix('orders')->name('orders.')->middleware(['auth'])->group(function (
     // ★★★ここを修正★★
     Route::get('/', [OrderController::class, 'index'])->name('index'); // URLを '/' に、名前を 'index' に変更
     // ★★★ここまで修正★★
+// 注文詳細ページ
+    Route::get('/{order}', [OrderController::class, 'show'])->name('show'); // ★この行
 
     // 商品に対する店舗選択ページを表示
     Route::get('choose-shop/{product}', [OrderController::class, 'chooseShopForProduct'])->name('choose-shop-for-product');
