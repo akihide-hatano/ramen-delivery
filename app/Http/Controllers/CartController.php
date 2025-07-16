@@ -21,8 +21,10 @@ class CartController extends Controller
             $product = Product::with('shops')->find($item['product_id']); // 店舗情報もロード
             if ($product) {
                 $item['product'] = $product;
+            // カートの$itemに保存されているshop_idを使って、その店舗の情報を取得する
+            $shop = $product->shops->firstWhere('id', $item['shop_id']); // ★ここを修正
                 // 商品に紐づく最初の店舗名を取得（home.blade.phpの表示ロジックに合わせて）
-                $item['shop_name'] = $product->shops->first()->name ?? '不明な店舗';
+                 $item['shop_name'] = $shop->name ?? '不明な店舗';
             }
             return $item;
         })->filter(function ($item) {
@@ -122,6 +124,17 @@ class CartController extends Controller
                 $deliverableProducts = $selectedShop->products()
                                                     ->where('is_delivery', true)
                                                     ->get();
+            // ★★★ ここを追加/修正 ★★★
+            // 店舗が選択されたら、その店舗のIDをセッションに保存する
+            Session::put('cartShopId', $selectedShop->id);
+            // デバッグ用: この時点でセッションに何が入っているか確認
+            // dd([
+            //     'location' => 'CartController@create - after selected shop found',
+            //     'selected_shop_id' => $selectedShop->id,
+            //     'session_cartShopId' => Session::get('cartShopId'), // ここで'7'と表示されるか確認
+            //     'session_all' => Session::all(),
+            // ]);
+            // ★★★ ここまで追加/修正 ★★★
             } else {
                 Session::flash('error', '選択された店舗が見つかりませんでした。');
             }
