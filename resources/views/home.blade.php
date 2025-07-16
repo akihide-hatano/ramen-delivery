@@ -140,7 +140,7 @@
                             <div class="p-4 text-center"> {{-- ★p-3 から p-4 に変更してパディングを増やす★ --}}
                                 <h4 class="text-xl font-semibold text-gray-800 truncate mb-2">{{ $product->name }}</h4> {{-- ★text-md から text-xl に変更して商品名を大きく★ --}}
                                 <p class="text-red-600 font-bold text-2xl mt-1">¥{{ number_format($product->price) }}</p> {{-- ★text-lg から text-2xl に変更して価格を大きく★ --}}
-                                <a href="{{ route('products.show', $product) }}" class="block text-center bg-green-500 text-white text-base px-4 py-2 rounded-md mt-4 hover:bg-green-600 transition duration-300">詳細を見る</a> {{-- ★ボタンのテキストサイズとパディングを調整★ --}}
+                                <p class="text-gray-600 text-sm mt-2 mb-4 overflow-hidden">{{$product->description}}</p>
                             </div>
                         </div>
                     @empty
