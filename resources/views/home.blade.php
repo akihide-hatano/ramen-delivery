@@ -125,21 +125,22 @@
             </div>
         </section>
 
-        <section class="featured-menu-section">
+<section class="featured-menu-section">
             <div class="container mx-auto">
                 <h3 class="text-3xl font-bold text-center text-gray-800 mb-8">おすすめメニュー</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                {{-- ★ここを修正します★ --}}
+                <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @forelse ($featuredProducts as $product)
                         <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
                             @if ($product->image_url)
-                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-32 object-cover">
+                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-48 object-cover"> {{-- ★h-32 から h-48 に変更して画像を大きく★ --}}
                             @else
-                                <img src="https://placehold.co/400x300/E0E0E0/000000?text=No+Image" alt="No Image" class="w-full h-32 object-cover">
+                                <img src="https://placehold.co/400x300/E0E0E0/000000?text=No+Image" alt="No Image" class="w-full h-48 object-cover"> {{-- ★h-32 から h-48 に変更して画像を大きく★ --}}
                             @endif
-                            <div class="p-3 text-center">
-                                <h4 class="text-md font-semibold text-gray-800 truncate">{{ $product->name }}</h4>
-                                <p class="text-red-600 font-bold text-lg mt-1">¥{{ number_format($product->price) }}</p>
-                                <a href="{{ route('products.show', $product) }}" class="block text-center bg-green-500 text-white text-sm px-3 py-1 rounded-md mt-2 hover:bg-green-600 transition duration-300">詳細</a>
+                            <div class="p-4 text-center"> {{-- ★p-3 から p-4 に変更してパディングを増やす★ --}}
+                                <h4 class="text-xl font-semibold text-gray-800 truncate mb-2">{{ $product->name }}</h4> {{-- ★text-md から text-xl に変更して商品名を大きく★ --}}
+                                <p class="text-red-600 font-bold text-2xl mt-1">¥{{ number_format($product->price) }}</p> {{-- ★text-lg から text-2xl に変更して価格を大きく★ --}}
+                                <a href="{{ route('products.show', $product) }}" class="block text-center bg-green-500 text-white text-base px-4 py-2 rounded-md mt-4 hover:bg-green-600 transition duration-300">詳細を見る</a> {{-- ★ボタンのテキストサイズとパディングを調整★ --}}
                             </div>
                         </div>
                     @empty
