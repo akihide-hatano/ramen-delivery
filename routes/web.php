@@ -72,6 +72,10 @@ Route::prefix('orders')->name('orders.')->middleware(['auth'])->group(function (
     Route::post('/', [OrderController::class, 'store'])->name('store');
     // 注文完了ページ
     Route::get('/complete', [OrderController::class, 'complete'])->name('complete');
+     // ★★★ここを追加★★
+    // 注文履歴一覧ページ (例: OrderControllerのindexメソッドに紐付ける)
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    // ★★★ここまで追加★★
 
     // 商品に対する店舗選択ページを表示
     Route::get('choose-shop/{product}', [OrderController::class, 'chooseShopForProduct'])->name('choose-shop-for-product');
