@@ -62,14 +62,31 @@ class CartController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function create()
+    public function create(Request $request)
     {
-        // 配達可能な商品のみを取得
-        $deliverableProducts = Product::where('is_delivery', true)
-                                    ->with('shops') // 店舗情報も必要ならロード
-                                    ->get();
+       $selectedShopId = $request->input('shop_id');
+        $selectedShop = null;
+        $deliverableProducts = collect(); // 空のコレクションで初期化
 
-        return view('cart.add', compact('deliverableProducts'));
+        // 全ての店舗を取得
+        $shops = Shop::all();
+
+        if ($selectedShopId) {
+            // 店舗が選択された場合
+            $selectedShop = Shop::find($selectedShopId);
+
+            if ($selectedShop) {
+                // 選択された店舗に紐づく配達可能な商品のみを取得
+                $deliverableProducts = $selectedShop->products()
+                                                    ->where('is_delivery', true)
+                                                    ->get();
+            } else {
+                Session::flash('error', '選択された店舗が見つかりませんでした。');
+            }
+        }
+
+        // ビューに渡す変数
+        return view('cart.add', compact('shops', 'selectedShop', 'deliverableProducts'));
     }
 
     /**
@@ -80,59 +97,66 @@ class CartController extends Controller
      */
     public function add(Request $request)
     {
-        // 'items' 配列が送信されているか確認
         $itemsToAdd = $request->input('items', []);
+        $selectedShopIdForCart = $request->input('selected_shop_id_for_cart'); // カートに追加する商品の店舗ID
 
         if (empty($itemsToAdd)) {
             return redirect()->back()->with('error', '追加する商品が選択されていません。');
         }
 
+        if (!$selectedShopIdForCart) {
+            return redirect()->back()->with('error', '商品を追加する店舗が指定されていません。');
+        }
+
         $cart = Session::get('cart', []);
-        $successCount = 0; // 正常に追加された商品の数
+        $successCount = 0;
+
+        // カートが空でない場合の店舗整合性チェック
+        if (!empty($cart)) {
+            $firstCartItem = reset($cart);
+            // カート内の商品が紐づく店舗と、今追加しようとしている店舗が異なるか
+            if ($firstCartItem['shop_id'] != $selectedShopIdForCart) {
+                // カート内の商品と選択された店舗が異なる場合、クリア確認ページへリダイレクト
+                // ここでのロジックは、以前の単一商品追加時のものに近い形に戻します。
+                // ユーザーに「カートをクリアして新しい店舗の商品を追加するか」を問う。
+                Session::flash('previous_add_product_id', array_keys($itemsToAdd)[0] ?? null); // 最初の商品のIDを渡す
+                Session::flash('previous_add_shop_id', $selectedShopIdForCart);
+                Session::flash('previous_add_quantity', array_values($itemsToAdd)[0]['quantity'] ?? 1);
+                return redirect()->route('cart.confirm-clear');
+            }
+        }
+
 
         foreach ($itemsToAdd as $productId => $itemData) {
             $quantity = $itemData['quantity'] ?? 1;
-            $selectedShopId = $itemData['shop_id'] ?? null;
 
             if ($quantity <= 0) {
-                continue; // 数量が0以下の商品はスキップ
+                continue;
             }
 
             $product = Product::find($productId);
 
             if (!$product) {
                 Session::flash('error', ($request->session()->get('error', '')) . "商品ID: {$productId} が見つかりませんでした。<br>");
-                continue; // 次の商品へ
+                continue;
             }
 
-            // is_deliveryチェック (以前の単一商品追加時と同様)
+            // is_deliveryチェック
             if (!$product->is_delivery) {
                 Session::flash('error', ($request->session()->get('error', '')) . "商品「{$product->name}」は配達対象外です。<br>");
-                continue; // 次の商品へ
+                continue;
             }
 
-            // 選択された店舗が有効か、商品に紐づいているか確認
-            if (!$selectedShopId || !$product->shops->contains($selectedShopId)) {
-                Session::flash('error', ($request->session()->get('error', '')) . "商品「{$product->name}」に有効な店舗が選択されていません。<br>");
-                continue; // 次の商品へ
-            }
-
-            // カートが空でない場合の店舗整合性チェック
-            if (!empty($cart)) {
-                $firstCartItem = reset($cart);
-                $firstProductInCart = Product::find($firstCartItem['product_id']);
-                // カート内の商品が紐づく店舗と、今追加しようとしている商品の店舗が異なるか
-                // かつ、その商品の店舗が、今追加しようとしている店舗に含まれていない場合
-                if ($firstProductInCart && !$firstProductInCart->shops->contains($selectedShopId)) {
-                    Session::flash('error', 'カートには他の店舗の商品が含まれています。異なる店舗の商品を同時に追加することはできません。カートをクリアしてから再度お試しください。');
-                    return redirect()->route('cart.index');
-                }
+            // 選択された店舗が、この商品に紐づいているか最終確認
+            if (!$product->shops->contains($selectedShopIdForCart)) {
+                Session::flash('error', ($request->session()->get('error', '')) . "商品「{$product->name}」は選択された店舗にはありません。<br>");
+                continue;
             }
 
             // カートに商品を追加するロジック
             $found = false;
             foreach ($cart as $key => $item) {
-                if ($item['product_id'] == $product->id && $item['shop_id'] == $selectedShopId) {
+                if ($item['product_id'] == $product->id && $item['shop_id'] == $selectedShopIdForCart) {
                     $cart[$key]['quantity'] += $quantity;
                     $found = true;
                     break;
@@ -142,7 +166,7 @@ class CartController extends Controller
                 $cart[] = [
                     'product_id' => $product->id,
                     'quantity' => $quantity,
-                    'shop_id' => $selectedShopId,
+                    'shop_id' => $selectedShopIdForCart, // フォームから受け取った店舗IDを使用
                 ];
             }
             $successCount++;
