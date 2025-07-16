@@ -24,9 +24,16 @@
                         <br>しばらくお待ちください。
                     </p>
 
-                    <a href="{{ route('home') }}" class="inline-flex items-center px-6 py-3 bg-blue-600 border border-transparent rounded-md font-semibold text-base text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring ring-blue-300 transition ease-in-out duration-150">
-                        ホームに戻る
-                    </a>
+                    <div class="flex items-center justify-center space-x-4"> {{-- ボタンを横並びにするためのflexコンテナ --}}
+                        <a href="{{ route('home') }}" class="inline-flex items-center px-6 py-3 bg-blue-600 border border-transparent rounded-md font-semibold text-base text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring ring-blue-300 transition ease-in-out duration-150">
+                            ホームに戻る
+                        </a>
+
+                        {{-- ★注文履歴を見るボタンを追加★ --}}
+                        <a href="{{ route('orders.index') }}" class="inline-flex items-center px-6 py-3 bg-indigo-600 border border-transparent rounded-md font-semibold text-base text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring ring-indigo-300 transition ease-in-out duration-150">
+                            注文履歴を見る
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
