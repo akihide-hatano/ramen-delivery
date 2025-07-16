@@ -11,7 +11,6 @@ class Product extends Model
 
     protected $fillable = [
         'category_id',
-        'shop_id', // ★追加: shop_idをfillableに追加
         'name',
         'description',
         'price',
@@ -36,6 +35,16 @@ class Product extends Model
     public function shop()
     {
         return $this->belongsTo(Shop::class);
+    }
+
+    /**
+     * 商品を取り扱っている店舗を取得 (多対多)
+     * ★ここを修正します: メソッド名を 'shop' から 'shops' (複数形) に変更し、belongsToMany を使用★
+     */
+    public function shops() // メソッド名を複数形 'shops' に変更
+    {
+        // 第二引数は中間テーブル名、第三引数はProductモデルの外部キー、第四引数はShopモデルの外部キー
+        return $this->belongsToMany(Shop::class, 'shop_products', 'product_id', 'shop_id');
     }
 
     /**

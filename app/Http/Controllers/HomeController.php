@@ -67,18 +67,11 @@ class HomeController extends Controller
             $message = '位置情報を許可すると、お近くの店舗が表示されます。';
         }
 
-        $ramenCategoryId = Category::where('name', 'ラーメン')->first()?->id;
-        $featuredProducts = collect();
-
-        if ($ramenCategoryId) {
-            $featuredProducts = Product::where('category_id', $ramenCategoryId)
-                                        ->with('shop') // おすすめ商品にも店舗情報をロード
-                                        ->inRandomOrder()
-                                        ->limit(6)
-                                        ->get();
-        }
-
-        $allProducts = Product::orderBy('name')->get(); // これはhome.blade.phpで使われていないので、削除しても良い
+        $featuredProducts = Product::with('shops') // 紐づく店舗情報もロード（home.blade.phpで表示するため必要）
+            ->whereIn('name', ['潮屋塩ラーメン', '味玉潮屋塩ラーメン']) // 特定の2つの商品名で絞り込み
+            ->where('is_limited', false) // 限定商品ではないことを確認
+            ->where('is_delivery', true) // 配達可能であることを確認
+            ->get(); // 取得
 
         $mapsApiKey = env('Maps_API_KEY');
 
