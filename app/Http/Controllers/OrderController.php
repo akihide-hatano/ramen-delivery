@@ -16,6 +16,18 @@ use Illuminate\Support\Facades\Config; // Configファサードを追加
 
 class OrderController extends Controller
 {
+
+        public function index()
+    {
+        // 認証済みのユーザーの注文を取得 (最新のものから表示)
+        // Orderモデルにuser()リレーションが定義されている必要があります。
+        // Userモデルにorders()リレーションも定義されている必要があります。
+        $orders = Auth::user()->orders()->latest()->get();
+
+        return view('orders.index', compact('orders'));
+    }
+
+    
     /**
      * 注文情報入力ページを表示 (旧 checkout メソッド)
      *
