@@ -16,11 +16,6 @@ use Illuminate\Support\Facades\Config; // Configファサードを追加
 
 class OrderController extends Controller
 {
-    // chooseShopForProduct, confirmShopAndAddToCart メソッドは、
-    // 現在のフローでは直接使われない可能性が高いですが、
-    // ここでは変更せずに残しておきます。
-    // 必要に応じて後で削除またはリファクタリングを検討してください。
-
     /**
      * 注文情報入力ページを表示 (旧 checkout メソッド)
      *
@@ -30,15 +25,18 @@ class OrderController extends Controller
     public function create(Request $request) // メソッド名を create に変更
     {
         $cart = Session::get('cart', []);
-        // CartController@add で cart_shop_id がセットされることを想定
-        $cartShopId = Session::get('cart_shop_id');
+        // CartController@add で cartShopId がセットされることを想定
+        $cartShopId = Session::get('cartShopId'); // ★ここを 'cartShopId' に統一
 
+        // dd($cartShopId); // デバッグ用: ここでは"7"が表示されるはず
+
+        // `dd` の引数も修正して、正しい `cartShopId` 変数を参照させる
         if (empty($cart) || !$cartShopId) {
-            dd('Redirecting: Cart empty or shop ID missing', ['cart' => $cart, 'cartShopId' => $cartShopId, 'session_all' => Session::all()]);
+            // dd('Redirecting: Cart empty or shop ID missing', ['cart' => $cart, 'cartShopId' => $cartShopId, 'session_all' => Session::all()]); // デバッグ用
             return redirect()->route('cart.index')->with('error', 'カートに商品がありません。');
         }
 
-        $items = collect($cart)->map(function ($quantity, $productId) { // $quantity と $productId の順序を修正
+        $items = collect($cart)->map(function ($quantity, $productId) {
             $product = Product::with('shops')->find($productId);
             if ($product) {
                 return [
@@ -47,11 +45,11 @@ class OrderController extends Controller
                     'product' => $product,
                     'shop_name' => $product->shops->first()->name ?? '不明な店舗',
                     'subtotal' => $product->price * $quantity,
-                    'shop_id' => $product->shops->first()->id ?? null, // shop_idも追加
+                    'shop_id' => $product->shops->first()->id ?? null,
                 ];
             }
             return null;
-        })->filter()->values(); // nullを除外してインデックスをリセット
+        })->filter()->values();
 
         // カート内の商品が全て同じ店舗からのものか最終確認
         $shopIdsInCart = $items->pluck('shop_id')->unique();
@@ -59,12 +57,11 @@ class OrderController extends Controller
             return redirect()->route('cart.index')->with('error', 'カートには複数の店舗の商品が含まれています。注文を完了するには、いずれかの店舗の商品を削除してください。');
         }
         if ($shopIdsInCart->first() != $cartShopId) {
-             // セッションのcart_shop_idと実際のカート内容が異なる場合の処理
+             // セッションのcartShopIdと実際のカート内容が異なる場合の処理
              Session::forget('cart');
-             Session::forget('cart_shop_id');
+             Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
              return redirect()->route('cart.index')->with('error', 'カート情報が不正です。カートをクリアしました。');
         }
-
 
         // カート内の商品が全て配達可能か最終確認
         $hasUndeliverableItem = $items->contains(function ($item) {
@@ -84,7 +81,7 @@ class OrderController extends Controller
 
         if (!$shop) {
             Session::forget('cart');
-            Session::forget('cart_shop_id');
+            Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
             return redirect()->route('cart.index')->with('error', 'カートに紐づく店舗が見つかりませんでした。カートをクリアしました。');
         }
 
@@ -96,17 +93,16 @@ class OrderController extends Controller
         // configファイルから配達エリアと時間帯オプションを取得
         $deliveryZones = Config::get('delivery.delivery_zones');
         $deliveryTimeOptions = Config::get('delivery.delivery_time_slots');
-        $paymentMethodOptions = [ // 支払い方法のオプションはBladeで直接定義されているため、ここでは不要だが、もしコントローラーで定義するなら含める
+        $paymentMethodOptions = [
             'cash' => '現金払い',
             'credit_card' => 'クレジットカード',
         ];
         $mapsApiKey = env('Maps_API_KEY');
 
-        // 予測配達時間の初期値 (JavaScriptで計算されるため、ここではnullで渡す)
         $estimatedDeliveryTimeMinutes = null;
 
         return view('orders.create', compact(
-            'items', // $cartItems ではなく $items を使用
+            'items',
             'shop',
             'totalPrice',
             'deliveryFee',
@@ -132,15 +128,15 @@ class OrderController extends Controller
         // バリデーション
         $request->validate([
             'delivery_address' => 'required|string|max:255',
-            'delivery_phone' => 'required|string|max:20', // 追加
-            'delivery_notes' => 'nullable|string|max:1000', // maxを500から1000に修正
+            'delivery_phone' => 'required|string|max:20',
+            'delivery_notes' => 'nullable|string|max:1000',
             'delivery_zone_name' => 'required|string|in:' . implode(',', array_keys(config('delivery.delivery_zones'))),
-            'desired_delivery_time_slot' => 'nullable|string|in:' . implode(',', array_keys(config('delivery.delivery_time_slots'))), // 追加
-            'payment_method' => 'required|string|in:cash,credit_card', // 追加
+            'desired_delivery_time_slot' => 'nullable|string|in:' . implode(',', array_keys(config('delivery.delivery_time_slots'))),
+            'payment_method' => 'required|string|in:cash,credit_card',
         ]);
 
         $cart = Session::get('cart', []);
-        $cartShopId = Session::get('cart_shop_id');
+        $cartShopId = Session::get('cartShopId'); // ★ここを 'cartShopId' に統一
 
         if (empty($cart) || !$cartShopId) {
             return redirect()->route('cart.index')->with('error', 'カートに商品がありません。');
@@ -156,18 +152,18 @@ class OrderController extends Controller
                 $totalPrice += $product->price * $quantity;
             } else {
                 Session::forget('cart');
-                Session::forget('cart_shop_id');
+                Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
                 return redirect()->route('cart.index')->with('error', 'カートに含まれる商品の一部が見つかりませんでした。カートをクリアしました。');
             }
         }
 
-        $shop = Shop::find($cartShopId); // shop_idはcartShopIdから取得済み
+        $shop = Shop::find($cartShopId);
 
         if (!$shop) {
             return redirect()->route('cart.index')->with('error', '注文店舗が見つかりませんでした。');
         }
 
-        $deliveryFee = 500; // 仮の配送料
+        $deliveryFee = 500;
         $grandTotal = $totalPrice + $deliveryFee;
 
         DB::beginTransaction();
@@ -177,17 +173,15 @@ class OrderController extends Controller
                 'user_id' => Auth::id(),
                 'shop_id' => $cartShopId,
                 'delivery_address' => $request->input('delivery_address'),
-                'delivery_phone' => $request->input('delivery_phone'), // 追加
+                'delivery_phone' => $request->input('delivery_phone'),
                 'delivery_zone_name' => $request->input('delivery_zone_name'),
-                'desired_delivery_time_slot' => $request->input('desired_delivery_time_slot'), // 追加
+                'desired_delivery_time_slot' => $request->input('desired_delivery_time_slot'),
                 'delivery_notes' => $request->input('delivery_notes'),
-                'total_price' => $totalPrice, // total_amount から total_price に修正
-                'delivery_fee' => $deliveryFee, // 追加
-                'grand_total' => $grandTotal, // 追加
-                'payment_method' => $request->input('payment_method'), // 追加
+                'total_price' => $totalPrice,
+                'delivery_fee' => $deliveryFee,
+                'grand_total' => $grandTotal,
+                'payment_method' => $request->input('payment_method'),
                 'status' => 'pending',
-                // 'estimated_delivery_time_minutes' はDBにカラムがないため、ここでは保存しない
-                // もし保存したい場合は、別途マイグレーションでカラムを追加してください。
             ]);
 
             foreach ($cart as $productId => $quantity) {
@@ -195,13 +189,13 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $productId,
                     'quantity' => $quantity,
-                    'price' => $products[$productId]->price, // unit_price から price に修正
-                    'subtotal' => $products[$productId]->price * $quantity, // 小計も保存
+                    'price' => $products[$productId]->price,
+                    'subtotal' => $products[$productId]->price * $quantity,
                 ]);
             }
 
             Session::forget('cart');
-            Session::forget('cart_shop_id'); // cart_shop_idもクリア
+            Session::forget('cartShopId'); // ★ここを 'cartShopId' に統一
 
             DB::commit();
 
@@ -250,24 +244,20 @@ class OrderController extends Controller
         // ピーク時間帯の判定と加算
         $now = Carbon::now();
         foreach ($peakHours as $period) {
-            // config/delivery.php の peak_hours の形式が 'HH:MM-HH:MM' なので、それを考慮
             list($startStr, $endStr) = explode('-', $period);
             $startTime = Carbon::parse($startStr);
             $endTime = Carbon::parse($endStr);
 
-            // 日付を考慮せず時間帯のみで判定
-            // Carbonのbetweenメソッドは日付も考慮するため、時間帯のみで判定するには工夫が必要
-            // ここでは、現在時刻の時分がピーク時間帯の時分に含まれるかをチェック
             $currentMinutes = $now->hour * 60 + $now->minute;
             $startMinutes = $startTime->hour * 60 + $startTime->minute;
             $endMinutes = $endTime->hour * 60 + $endTime->minute;
 
-            if ($startMinutes < $endMinutes) { // 通常のピーク時間帯 (例: 18:00-20:00)
+            if ($startMinutes < $endMinutes) {
                 if ($currentMinutes >= $startMinutes && $currentMinutes < $endMinutes) {
                     $estimatedTime += $peakSurcharge;
                     break;
                 }
-            } else { // 日付をまたぐピーク時間帯 (例: 23:00-01:00)
+            } else {
                 if ($currentMinutes >= $startMinutes || $currentMinutes < $endMinutes) {
                     $estimatedTime += $peakSurcharge;
                     break;
@@ -275,7 +265,6 @@ class OrderController extends Controller
             }
         }
 
-        // ランダムなバッファを加算
         $estimatedTime += rand($bufferMin, $bufferMax);
 
         return (int) round($estimatedTime);
@@ -292,7 +281,7 @@ class OrderController extends Controller
      */
     private function calculateDistance($lat1, $lon1, $lat2, $lon2): float
     {
-        $earthRadius = 6371; // 地球の半径 (km)
+        $earthRadius = 6371;
 
         $dLat = deg2rad($lat2 - $lat1);
         $dLon = deg2rad($lon2 - $lon1);
@@ -302,7 +291,7 @@ class OrderController extends Controller
              sin($dLon / 2) * sin($dLon / 2);
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
-        $distance = $earthRadius * $c; // 距離 (km)
+        $distance = $earthRadius * $c;
         return $distance;
     }
 }
