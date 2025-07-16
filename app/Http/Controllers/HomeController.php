@@ -75,6 +75,6 @@ class HomeController extends Controller
 
         $mapsApiKey = env('Maps_API_KEY');
 
-        return view('home', compact('nearbyShops', 'message', 'featuredProducts', 'allProducts', 'mapsApiKey', 'latitude', 'longitude'));
+        return view('home', compact('nearbyShops', 'message', 'featuredProducts','mapsApiKey', 'latitude', 'longitude'));
     }
 }
