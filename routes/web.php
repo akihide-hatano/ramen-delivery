@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminHomeController;
 use App\Http\Controllers\Admin\AdminShopController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 
@@ -99,4 +100,6 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::resource('products', AdminProductController::class);
     // 管理者によるカテゴリ管理
     Route::resource('categories', AdminCategoryController::class);
+    // 管理者によるカテゴリ管理
+    Route::resource('orders', AdminOrderController::class);
 });
