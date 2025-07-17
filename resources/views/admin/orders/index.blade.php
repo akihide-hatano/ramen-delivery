@@ -116,6 +116,7 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('admin.orders.show', $order) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">詳細</a>
+                                                <a href="{{ route('admin.orders.edit', $order) }}" class="text-green-600 hover:text-green mr-3">編集</a>
                                                 <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" class="inline-block" onsubmit="return confirm('本当にこの注文を削除しますか？');">
                                                     @csrf
                                                     @method('DELETE')
