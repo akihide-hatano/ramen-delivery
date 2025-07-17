@@ -11,7 +11,6 @@
                 <div class="p-6 text-gray-900">
                     <h3 class="text-2xl font-bold mb-4">全ての注文一覧</h3>
 
-                    {{-- ★★★ここから修正: フィルタリングフォーム★★★ --}}
                     <div class="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm">
                         <form action="{{ route('admin.orders.index') }}" method="GET" class="flex flex-wrap items-end space-x-4">
                             <div>
@@ -62,8 +61,6 @@
                             </div>
                         </form>
                     </div>
-                    {{-- ★★★ここまで修正★★★ --}}
-
                     @if ($orders->isEmpty())
                         <p>まだ注文がありません。</p>
                     @else

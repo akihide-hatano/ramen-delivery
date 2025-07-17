@@ -51,4 +51,11 @@ class AdminOrderController extends Controller // ★このクラス名が正し�
         // フィルタリングのために使用したリクエストデータと選択肢データをビューに渡す
         return view('admin.orders.index', compact('orders', 'shops', 'users'))->with($request->query());
     }
+
+    public function show(Order $order){
+    // 注文詳細ページで必要なリレーション（user, shop, orderItems.product）をEager Loadします。
+    // これにより、ビューで $order->user->name や $order->shop->name、商品情報などが使えます。
+    $order->load(['user','shop','orderItems.product']);
+    return view('admin.orders.show', compact('order'));
+    }
     }
