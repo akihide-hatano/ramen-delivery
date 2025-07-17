@@ -58,4 +58,59 @@ class AdminOrderController extends Controller // ★このクラス名が正し�
     $order->load(['user','shop','orderItems.product']);
     return view('admin.orders.show', compact('order'));
     }
+
+    /**
+     * Show the form for editing the specified resource.
+     * 指定された注文の編集フォームを表示します。
+     *
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\View\View
+     */
+    public function edit(Order $order){
+        // 編集フォームで表示するために、関連するユーザーと店舗の情報をEager Loadします。
+        // OrderItemの編集は複雑になるため、ここでは注文のヘッダー情報（ステータス、配送先など）のみを対象とします。
+        $order->load(['user', 'shop']);
+
+        $statuses = [
+            'pending'    => '保留中',
+            'preparing'  => '準備中',
+            'delivering' => '配達中',
+            'completed'  => '完了',
+            'cancelled'  => 'キャンセル',
+        ];
+
+        return view('admin.orders.edit',compact('order','statuses'));
+    }
+
+    public function update(Request $request ,Order $order){
+        //バリデーションルール
+        $validatedData = $request->validate([
+            'status' => 'required|string|in:pending,preparing,delivering,completed,cancelled',
+            'delivery_address' => 'required|string|max:255',
+            'delivery_phone' => 'required|string|max:20',
+            'desired_delivery_time_slot' => 'nullable|string|max:50',
+            'delivery_notes' => 'nullable|string|max:500',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // 注文データを更新
+            $order->update($validatedData);
+
+            DB::commit();
+            Log::info('Admin: Order updated successfully.', ['order_id' => $order->id, 'admin_user_id' => auth()->id()]);
+            return redirect()->route('admin.orders.show', $order)->with('success', '注文情報を更新しました。');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Admin: Failed to update order.', [
+                'order_id' => $order->id,
+                'admin_user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('error', '注文情報の更新に失敗しました。');
+        }
+    }
     }
