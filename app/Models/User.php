@@ -16,6 +16,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin', // 追加したカラムをマスアサインメント可能にする
+        'address',
+        'phone_number',
     ];
 
     protected $hidden = [
