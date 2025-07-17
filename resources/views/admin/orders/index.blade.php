@@ -11,6 +11,59 @@
                 <div class="p-6 text-gray-900">
                     <h3 class="text-2xl font-bold mb-4">全ての注文一覧</h3>
 
+                    {{-- ★★★ここから修正: フィルタリングフォーム★★★ --}}
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm">
+                        <form action="{{ route('admin.orders.index') }}" method="GET" class="flex flex-wrap items-end space-x-4">
+                            <div>
+                                <label for="shop_id" class="block text-sm font-medium text-gray-700">店舗で絞り込み:</label>
+                                <select name="shop_id" id="shop_id"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <option value="">全て</option>
+                                    @foreach ($shops as $shop)
+                                        <option value="{{ $shop->id }}" {{ request('shop_id') == $shop->id ? 'selected' : '' }}>
+                                            {{ $shop->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="user_id" class="block text-sm font-medium text-gray-700">ユーザーで絞り込み:</label>
+                                <select name="user_id" id="user_id"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <option value="">全て</option>
+                                    @foreach ($users as $user)
+                                        <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="status" class="block text-sm font-medium text-gray-700">ステータスで絞り込み:</label>
+                                <select name="status" id="status"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <option value="">全て</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>保留中</option>
+                                    <option value="preparing" {{ request('status') == 'preparing' ? 'selected' : '' }}>準備中</option>
+                                    <option value="delivering" {{ request('status') == 'delivering' ? 'selected' : '' }}>配達中</option>
+                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>完了</option>
+                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>キャンセル</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end space-x-2">
+                                <button type="submit" class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    絞り込む
+                                </button>
+                                @if (request()->filled('shop_id') || request()->filled('user_id') || request()->filled('status'))
+                                    <a href="{{ route('admin.orders.index') }}" class="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        リセット
+                                    </a>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
+                    {{-- ★★★ここまで修正★★★ --}}
+
                     @if ($orders->isEmpty())
                         <p>まだ注文がありません。</p>
                     @else
